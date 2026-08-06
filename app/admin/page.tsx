@@ -38,7 +38,17 @@ useEffect(() => {
     <div>
       <h1>Admin Dashboard</h1>
 
-      <pre>{JSON.stringify(products, null, 2)}</pre>
+     return (
+  <div>
+    <h2 className="mb-6 text-3xl font-bold">
+      Dashboard
+    </h2>
+
+    <p className="text-gray-600">
+      Welcome to your store dashboard.
+    </p>
+  </div>
+);
     </div>
   );
 }
