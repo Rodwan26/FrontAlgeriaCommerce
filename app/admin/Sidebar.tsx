@@ -31,6 +31,7 @@ const links = [
     href: "/admin/settings",
     icon: Settings,
   },
+ 
 ];
 
 export default function Sidebar() {
@@ -60,6 +61,12 @@ export default function Sidebar() {
             </Link>
           );
         })}
+        <Link
+  href="/admin/categories"
+  className="..."
+>
+  Categories
+</Link>
       </nav>
     </aside>
   );

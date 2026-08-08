@@ -24,3 +24,40 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ---------- Global Form Styles ---------- */
+
+input,
+textarea,
+select {
+  color: #111827;
+  background: #ffffff;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+label {
+  color: #111827;
+  font-weight: 600;
+}
+
+th {
+  color: #111827;
+  font-weight: 700;
+}
+
+td {
+  color: #374151;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #111827;
+}
