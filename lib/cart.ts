@@ -40,17 +40,20 @@ export function saveCart(cart: CartItem[]) {
   window.dispatchEvent(new Event("cart-updated"));
 }
 
-export function addToCart(product: CartProduct) {
+export function addToCart(
+  product: CartProduct,
+  quantity: number = 1
+)  {
   const cart = getCart();
 
   const existingItem = cart.find((item) => item.id === product.id);
 
   if (existingItem) {
-    existingItem.quantity += 1;
+   existingItem.quantity += quantity;
   } else {
     cart.push({
       ...product,
-      quantity: 1,
+   quantity,
     });
   }
 

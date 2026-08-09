@@ -1,5 +1,5 @@
 "use client";
-
+import { addToCart } from "../../../lib/cart";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -20,14 +20,6 @@ type Product = {
   price: number;
   image: string | null;
   category_id?: number;
-};
-
-type CartItem = {
-  id: number;
-  name: string;
-  price: number;
-  image: string | null;
-  quantity: number;
 };
 
 export default function ProductPage({
@@ -67,45 +59,7 @@ export default function ProductPage({
     loadProduct();
   }, [params]);
 
-  function addToCart() {
-    if (!product) return;
-
-    try {
-      const storedCart = localStorage.getItem("cart");
-
-      const cart: CartItem[] = storedCart
-        ? JSON.parse(storedCart)
-        : [];
-
-      const existingProduct = cart.find(
-        (item) => item.id === product.id
-      );
-
-      if (existingProduct) {
-        existingProduct.quantity += quantity;
-      } else {
-        cart.push({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          quantity,
-        });
-      }
-
-      localStorage.setItem("cart", JSON.stringify(cart));
-
-      window.dispatchEvent(new Event("cartUpdated"));
-
-      setAdded(true);
-
-      setTimeout(() => {
-        setAdded(false);
-      }, 2500);
-    } catch (err) {
-      console.error("Failed to add product to cart:", err);
-    }
-  }
+ 
 
   if (loading) {
     return (
@@ -329,7 +283,25 @@ export default function ProductPage({
             {/* Add to cart */}
             <button
               type="button"
-              onClick={addToCart}
+              onClick={() => {
+  if (!product) return;
+
+  addToCart(
+    {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+    },
+    quantity
+  );
+
+  setAdded(true);
+
+  setTimeout(() => {
+    setAdded(false);
+  }, 2500);
+}}
               className={`group mt-8 flex w-full items-center justify-center gap-3 rounded-full px-7 py-4 text-sm font-semibold transition-all duration-300 ${
                 added
                   ? "bg-green-600 text-white shadow-lg shadow-green-600/20"
