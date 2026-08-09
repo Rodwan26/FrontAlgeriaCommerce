@@ -19,7 +19,7 @@ import {
   getCartTotal,
   removeFromCart,
   updateCartQuantity,
-} from "../lib/cart";
+} from "../../lib/cart";
 
 export default function CartPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
