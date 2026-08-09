@@ -71,6 +71,97 @@ export default function Home() {
     });
   }
 
+  function handleCardMove(
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) {
+    const card = e.currentTarget;
+
+    const rect = card.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX =
+      ((y - centerY) / centerY) * -5;
+
+    const rotateY =
+      ((x - centerX) / centerX) * 5;
+
+    card.style.transform = `
+      perspective(1000px)
+      rotateX(${rotateX}deg)
+      rotateY(${rotateY}deg)
+      translateY(-6px)
+      scale(1.015)
+    `;
+
+    const image = card.querySelector(
+      ".product-image"
+    ) as HTMLElement | null;
+
+    const content = card.querySelector(
+      ".product-content"
+    ) as HTMLElement | null;
+
+    const badge = card.querySelector(
+      ".product-badge"
+    ) as HTMLElement | null;
+
+    if (image) {
+      image.style.transform = `
+        scale(1.08)
+        translateZ(25px)
+      `;
+    }
+
+    if (content) {
+      content.style.transform = `
+        translateZ(18px)
+      `;
+    }
+
+    if (badge) {
+      badge.style.transform = `
+        translateZ(35px)
+      `;
+    }
+  }
+
+  function handleCardLeave(
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) {
+    const card = e.currentTarget;
+
+    card.style.transform = "";
+
+    const image = card.querySelector(
+      ".product-image"
+    ) as HTMLElement | null;
+
+    const content = card.querySelector(
+      ".product-content"
+    ) as HTMLElement | null;
+
+    const badge = card.querySelector(
+      ".product-badge"
+    ) as HTMLElement | null;
+
+    if (image) {
+      image.style.transform = "";
+    }
+
+    if (content) {
+      content.style.transform = "";
+    }
+
+    if (badge) {
+      badge.style.transform = "";
+    }
+  }
+
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
@@ -85,9 +176,11 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#f8f8f6] text-gray-900">
+
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-black/5 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black text-sm font-bold text-white">
               AC
@@ -105,6 +198,7 @@ export default function Home() {
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
+
             <a
               href="#products"
               className="text-sm font-medium text-gray-600 transition hover:text-black"
@@ -126,46 +220,46 @@ export default function Home() {
               <ShoppingCart size={17} />
               Cart
             </Link>
+
           </nav>
+
         </div>
       </header>
 
       {/* Hero */}
       <section className="group relative overflow-hidden bg-black text-white">
-        {/* Ambient light */}
+
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,0.14),transparent_35%)]" />
 
-        {/* Moving light */}
         <div className="pointer-events-none absolute -left-1/2 top-[-30%] h-[160%] w-[45%] rotate-12 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent blur-3xl transition-transform duration-[2500ms] ease-out group-hover:translate-x-[330%]" />
 
-        {/* Small glowing orb */}
         <div className="pointer-events-none absolute right-[12%] top-[20%] h-40 w-40 rounded-full bg-white/[0.04] blur-3xl transition-all duration-[2000ms] group-hover:scale-150 group-hover:bg-white/[0.08]" />
 
         <div className="relative mx-auto flex min-h-[520px] max-w-7xl items-center px-6 py-24">
+
           <div className="max-w-3xl animate-[fadeUp_0.9s_ease-out]">
-            {/* Badge */}
+
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-gray-200 backdrop-blur-xl transition duration-500 hover:border-white/30 hover:bg-white/15">
               <Sparkles size={16} />
               Premium shopping experience
             </div>
 
-            {/* Title */}
             <h2 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
               Everything you need.
+
               <span className="block text-gray-400">
                 All in one place.
               </span>
             </h2>
 
-            {/* Description */}
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-300">
               Discover carefully selected products at Algeria
               Commerce. Simple shopping, great products, and a
               seamless experience.
             </p>
 
-            {/* Buttons */}
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+
               <a
                 href="#products"
                 className="group/button flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:-translate-y-1 hover:bg-gray-200 hover:shadow-xl"
@@ -184,8 +278,11 @@ export default function Home() {
               >
                 Browse categories
               </a>
+
             </div>
+
           </div>
+
         </div>
       </section>
 
@@ -194,8 +291,9 @@ export default function Home() {
         id="categories"
         className="mx-auto max-w-7xl px-6 py-16"
       >
-        {/* Section heading */}
+
         <div className="mb-8 flex items-end justify-between">
+
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-400">
               Explore
@@ -206,13 +304,12 @@ export default function Home() {
             </h2>
           </div>
 
-          {/* Navigation buttons */}
           <div className="hidden gap-2 sm:flex">
+
             <button
               type="button"
               onClick={() => scrollCategories("left")}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-all duration-300 hover:-translate-x-1 hover:bg-black hover:text-white hover:shadow-md"
-              aria-label="Previous categories"
             >
               <ChevronLeft size={18} />
             </button>
@@ -221,26 +318,25 @@ export default function Home() {
               type="button"
               onClick={() => scrollCategories("right")}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-all duration-300 hover:translate-x-1 hover:bg-black hover:text-white hover:shadow-md"
-              aria-label="Next categories"
             >
               <ChevronRight size={18} />
             </button>
+
           </div>
+
         </div>
 
-        {/* Category carousel */}
         <div className="relative">
-          {/* Left fade */}
+
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-[#f8f8f6] to-transparent" />
 
-          {/* Right fade */}
           <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-[#f8f8f6] to-transparent" />
 
           <div
             ref={categoriesRef}
             className="flex gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
-            {/* All products */}
+
             <button
               type="button"
               onClick={() => setSelectedCategory(null)}
@@ -253,8 +349,8 @@ export default function Home() {
               All Products
             </button>
 
-            {/* Categories */}
             {categories.map((category) => (
+
               <button
                 type="button"
                 key={category.id}
@@ -267,9 +363,12 @@ export default function Home() {
               >
                 {category.name}
               </button>
+
             ))}
+
           </div>
         </div>
+
       </section>
 
       {/* Products */}
@@ -277,8 +376,9 @@ export default function Home() {
         id="products"
         className="mx-auto max-w-7xl px-6 pb-24"
       >
-        {/* Products header */}
+
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-gray-400">
               Collection
@@ -289,8 +389,8 @@ export default function Home() {
             </h2>
           </div>
 
-          {/* Search */}
           <div className="relative w-full md:w-80">
+
             <Search
               size={18}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
@@ -303,84 +403,116 @@ export default function Home() {
               placeholder="Search products..."
               className="w-full rounded-full border border-black/10 bg-white py-3 pl-11 pr-5 text-sm outline-none transition-all duration-300 focus:border-black focus:shadow-md"
             />
+
           </div>
+
         </div>
 
-        {/* Loading */}
         {loading ? (
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
             {[1, 2, 3, 4].map((item) => (
               <div
                 key={item}
                 className="h-96 animate-pulse rounded-2xl bg-gray-200"
               />
             ))}
+
           </div>
+
         ) : filteredProducts.length === 0 ? (
-          /* Empty */
+
           <div className="rounded-2xl border border-black/5 bg-white px-6 py-20 text-center">
             <p className="text-gray-500">
               No products found.
             </p>
           </div>
+
         ) : (
-          /* Product grid */
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-           {filteredProducts.map((product, index) => (
-  <Link
-    key={product.id}
-    href={`/products/${product.id}`}
-    className="group overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl animate-[fadeUp_0.7s_ease-out_forwards]"
-    style={{
-      animationDelay: `${index * 100}ms`,
-    }}
-  >
-    <div className="relative aspect-square overflow-hidden bg-gray-100">
-      {product.image ? (
-        <img
-          src={`${process.env.NEXT_PUBLIC_API_URL}${product.image}`}
-          alt={product.name}
-          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-        />
-      ) : (
-        <div className="flex h-full items-center justify-center text-sm text-gray-400">
-          No Image
-        </div>
-      )}
 
-      <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold backdrop-blur-xl">
-        New
-      </div>
-    </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
 
-    <div className="p-5">
-      <h3 className="font-semibold text-gray-900">
-        {product.name}
-      </h3>
+            {filteredProducts.map((product, index) => (
 
-      <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500">
-        {product.description}
-      </p>
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                onMouseMove={handleCardMove}
+                onMouseLeave={handleCardLeave}
+                className="product-card group relative overflow-hidden rounded-3xl border border-black/5 bg-white shadow-sm animate-[fadeUp_0.7s_ease-out_forwards]"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                }}
+              >
 
-      <div className="mt-5 flex items-center justify-between">
-        <p className="text-lg font-bold text-gray-900">
-          {product.price.toLocaleString()} DA
-        </p>
+                {/* Product image */}
 
-        <span className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all duration-300 group-hover:bg-gray-800 group-hover:px-5">
-          View
-        </span>
-      </div>
-    </div>
-  </Link>
-))}
+                <div className="relative aspect-square overflow-hidden bg-gray-100">
+
+                  {product.image ? (
+
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_URL}${product.image}`}
+                      alt={product.name}
+                      className="product-image h-full w-full object-cover"
+                    />
+
+                  ) : (
+
+                    <div className="flex h-full items-center justify-center text-sm text-gray-400">
+                      No Image
+                    </div>
+
+                  )}
+
+                  <div className="product-badge absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold backdrop-blur-xl">
+                    New
+                  </div>
+
+                </div>
+
+                {/* Product content */}
+
+                <div className="product-content p-5">
+
+                  <h3 className="font-semibold text-gray-900">
+                    {product.name}
+                  </h3>
+
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500">
+                    {product.description}
+                  </p>
+
+                  <div className="mt-5 flex items-center justify-between">
+
+                    <p className="text-lg font-bold text-gray-900">
+                      {product.price.toLocaleString()} DA
+                    </p>
+
+                    <span className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all duration-300 group-hover:bg-gray-800">
+                      View
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </Link>
+
+            ))}
+
           </div>
+
         )}
+
       </section>
 
       {/* Footer */}
       <footer className="border-t border-black/5 bg-white">
+
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-10 md:flex-row md:items-center md:justify-between">
+
           <div>
             <p className="font-bold">
               Algeria Commerce
@@ -394,8 +526,11 @@ export default function Home() {
           <p className="text-sm text-gray-400">
             © {new Date().getFullYear()} Algeria Commerce
           </p>
+
         </div>
+
       </footer>
+
     </main>
   );
 }
