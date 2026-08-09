@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Search } from "lucide-react";
 
 type OrderItem = {
   id: number;
@@ -26,9 +26,21 @@ type Order = {
   items: OrderItem[];
 };
 
+const statuses = [
+  "all",
+  "pending",
+  "confirmed",
+  "shipped",
+  "delivered",
+  "cancelled",
+];
+
 export default function OrdersTable() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   async function loadOrders() {
     try {
@@ -82,6 +94,52 @@ export default function OrdersTable() {
     return status.charAt(0).toUpperCase() + status.slice(1);
   }
 
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const searchValue = search.toLowerCase().trim();
+
+      const matchesSearch =
+        searchValue === "" ||
+        order.id.toString().includes(searchValue) ||
+        order.customer_name
+          .toLowerCase()
+          .includes(searchValue) ||
+        order.customer_phone
+          .toLowerCase()
+          .includes(searchValue);
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        order.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, search, statusFilter]);
+
+  const statistics = {
+    total: orders.length,
+
+    pending: orders.filter(
+      (order) => order.status === "pending"
+    ).length,
+
+    confirmed: orders.filter(
+      (order) => order.status === "confirmed"
+    ).length,
+
+    shipped: orders.filter(
+      (order) => order.status === "shipped"
+    ).length,
+
+    delivered: orders.filter(
+      (order) => order.status === "delivered"
+    ).length,
+
+    cancelled: orders.filter(
+      (order) => order.status === "cancelled"
+    ).length,
+  };
+
   if (loading) {
     return (
       <div className="rounded-xl border bg-white p-8 text-center">
@@ -92,142 +150,279 @@ export default function OrdersTable() {
     );
   }
 
-  if (orders.length === 0) {
-    return (
-      <div className="rounded-xl border bg-white p-8 text-center">
-        <p className="text-gray-500">
-          No orders found.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="overflow-hidden rounded-xl border bg-white">
-      <div className="overflow-x-auto">
-        <table className="w-full">
+    <div className="space-y-6">
 
-          <thead className="bg-gray-50">
-            <tr>
+      {/* Statistics */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Order
-              </th>
+        <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-gray-500">
+            Total
+          </p>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Customer
-              </th>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {statistics.total}
+          </p>
+        </div>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Phone
-              </th>
+        <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-yellow-600">
+            Pending
+          </p>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Items
-              </th>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {statistics.pending}
+          </p>
+        </div>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Total
-              </th>
+        <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-blue-600">
+            Confirmed
+          </p>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                Status
-              </th>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {statistics.confirmed}
+          </p>
+        </div>
 
-              <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
-                Actions
-              </th>
+        <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-purple-600">
+            Shipped
+          </p>
 
-            </tr>
-          </thead>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {statistics.shipped}
+          </p>
+        </div>
 
-          <tbody>
+        <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-green-600">
+            Delivered
+          </p>
 
-            {orders.map((order) => (
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {statistics.delivered}
+          </p>
+        </div>
 
-              <tr
-                key={order.id}
-                className="border-t transition hover:bg-gray-50"
-              >
+        <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <p className="text-sm text-red-600">
+            Cancelled
+          </p>
 
-                {/* Order ID */}
-                <td className="px-6 py-4">
-                  <p className="font-semibold text-gray-900">
-                    #{order.id}
-                  </p>
-                </td>
+          <p className="mt-2 text-2xl font-bold text-gray-900">
+            {statistics.cancelled}
+          </p>
+        </div>
 
-                {/* Customer */}
-                <td className="px-6 py-4">
-                  <p className="font-medium text-gray-900">
-                    {order.customer_name}
-                  </p>
-
-                  <p className="mt-1 text-sm text-gray-500">
-                    {order.customer_address}
-                  </p>
-                </td>
-
-                {/* Phone */}
-                <td className="px-6 py-4">
-                  <p className="text-gray-700">
-                    {order.customer_phone}
-                  </p>
-                </td>
-
-                {/* Items */}
-                <td className="px-6 py-4">
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-                    {order.items.reduce(
-                      (total, item) => total + item.quantity,
-                      0
-                    )}
-                  </span>
-                </td>
-
-                {/* Total */}
-                <td className="px-6 py-4 font-semibold text-gray-900">
-                  {order.total} DA
-                </td>
-
-                {/* Status */}
-                <td className="px-6 py-4">
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusStyle(
-                      order.status
-                    )}`}
-                  >
-                    {formatStatus(order.status)}
-                  </span>
-
-                </td>
-
-                {/* Actions */}
-                <td className="px-6 py-4">
-
-                  <div className="flex justify-center">
-
-                    <Link
-                      href={`/admin/orders/${order.id}`}
-                      className="rounded-lg bg-blue-100 p-2 text-blue-600 transition hover:bg-blue-200"
-                      title="View order"
-                    >
-                      <Eye size={18} />
-                    </Link>
-
-                  </div>
-
-                </td>
-
-              </tr>
-
-            ))}
-
-          </tbody>
-
-        </table>
       </div>
+
+      {/* Search + Filter */}
+      <div className="rounded-xl border bg-white p-5 shadow-sm">
+
+        <div className="flex flex-col gap-4 md:flex-row">
+
+          {/* Search */}
+          <div className="relative flex-1">
+
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
+
+            <input
+              type="text"
+              placeholder="Search by order ID, customer name or phone..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full rounded-lg border py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+
+          </div>
+
+          {/* Status filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-lg border px-4 py-2.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          >
+            {statuses.map((status) => (
+              <option
+                key={status}
+                value={status}
+              >
+                {status === "all"
+                  ? "All statuses"
+                  : formatStatus(status)}
+              </option>
+            ))}
+          </select>
+
+        </div>
+
+      </div>
+
+      {/* Orders table */}
+      {filteredOrders.length === 0 ? (
+        <div className="rounded-xl border bg-white p-10 text-center">
+
+          <p className="font-medium text-gray-700">
+            No orders found.
+          </p>
+
+          <p className="mt-1 text-sm text-gray-500">
+            Try changing your search or status filter.
+          </p>
+
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+
+          <div className="overflow-x-auto">
+
+            <table className="w-full">
+
+              <thead className="bg-gray-50">
+
+                <tr>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Order
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Customer
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Phone
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Items
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Total
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                    Status
+                  </th>
+
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                    Actions
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                {filteredOrders.map((order) => (
+
+                  <tr
+                    key={order.id}
+                    className="border-t transition hover:bg-gray-50"
+                  >
+
+                    {/* Order */}
+                    <td className="px-6 py-4">
+
+                      <p className="font-semibold text-gray-900">
+                        #{order.id}
+                      </p>
+
+                    </td>
+
+                    {/* Customer */}
+                    <td className="px-6 py-4">
+
+                      <p className="font-medium text-gray-900">
+                        {order.customer_name}
+                      </p>
+
+                      <p className="mt-1 text-sm text-gray-500">
+                        {order.customer_address}
+                      </p>
+
+                    </td>
+
+                    {/* Phone */}
+                    <td className="px-6 py-4">
+
+                      <p className="text-gray-700">
+                        {order.customer_phone}
+                      </p>
+
+                    </td>
+
+                    {/* Items */}
+                    <td className="px-6 py-4">
+
+                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                        {order.items.reduce(
+                          (total, item) =>
+                            total + item.quantity,
+                          0
+                        )}
+                      </span>
+
+                    </td>
+
+                    {/* Total */}
+                    <td className="px-6 py-4 font-semibold text-gray-900">
+
+                      {order.total.toLocaleString()} DA
+
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4">
+
+                      <span
+                        className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusStyle(
+                          order.status
+                        )}`}
+                      >
+                        {formatStatus(order.status)}
+                      </span>
+
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-6 py-4">
+
+                      <div className="flex justify-center">
+
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="rounded-lg bg-blue-100 p-2 text-blue-600 transition hover:bg-blue-200"
+                          title="View order"
+                        >
+                          <Eye size={18} />
+                        </Link>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                ))}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+      )}
+
     </div>
   );
 }
+
