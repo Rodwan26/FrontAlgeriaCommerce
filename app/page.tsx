@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Search,
   ShoppingCart,
   ArrowRight,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 type Product = {
@@ -30,6 +32,8 @@ export default function Home() {
     useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const categoriesRef = useRef<HTMLDivElement>(null);
 
   async function loadStore() {
     try {
@@ -57,6 +61,15 @@ export default function Home() {
   useEffect(() => {
     loadStore();
   }, []);
+
+  function scrollCategories(direction: "left" | "right") {
+    if (!categoriesRef.current) return;
+
+    categoriesRef.current.scrollBy({
+      left: direction === "right" ? 320 : -320,
+      behavior: "smooth",
+    });
+  }
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -118,16 +131,25 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-black text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,0.12),transparent_35%)]" />
+      <section className="group relative overflow-hidden bg-black text-white">
+        {/* Ambient light */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,0.14),transparent_35%)]" />
+
+        {/* Moving light */}
+        <div className="pointer-events-none absolute -left-1/2 top-[-30%] h-[160%] w-[45%] rotate-12 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent blur-3xl transition-transform duration-[2500ms] ease-out group-hover:translate-x-[330%]" />
+
+        {/* Small glowing orb */}
+        <div className="pointer-events-none absolute right-[12%] top-[20%] h-40 w-40 rounded-full bg-white/[0.04] blur-3xl transition-all duration-[2000ms] group-hover:scale-150 group-hover:bg-white/[0.08]" />
 
         <div className="relative mx-auto flex min-h-[520px] max-w-7xl items-center px-6 py-24">
-          <div className="max-w-3xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-gray-200 backdrop-blur">
+          <div className="max-w-3xl animate-[fadeUp_0.9s_ease-out]">
+            {/* Badge */}
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-gray-200 backdrop-blur-xl transition duration-500 hover:border-white/30 hover:bg-white/15">
               <Sparkles size={16} />
               Premium shopping experience
             </div>
 
+            {/* Title */}
             <h2 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
               Everything you need.
               <span className="block text-gray-400">
@@ -135,24 +157,30 @@ export default function Home() {
               </span>
             </h2>
 
+            {/* Description */}
             <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-300">
               Discover carefully selected products at Algeria
               Commerce. Simple shopping, great products, and a
               seamless experience.
             </p>
 
+            {/* Buttons */}
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <a
                 href="#products"
-                className="flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-black transition hover:bg-gray-200"
+                className="group/button flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-black transition-all duration-300 hover:-translate-y-1 hover:bg-gray-200 hover:shadow-xl"
               >
                 Explore products
-                <ArrowRight size={17} />
+
+                <ArrowRight
+                  size={17}
+                  className="transition-transform duration-300 group-hover/button:translate-x-1"
+                />
               </a>
 
               <a
                 href="#categories"
-                className="rounded-full border border-white/20 px-7 py-3.5 text-center text-sm font-semibold text-white transition hover:bg-white/10"
+                className="rounded-full border border-white/20 px-7 py-3.5 text-center text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-white/10"
               >
                 Browse categories
               </a>
@@ -166,43 +194,81 @@ export default function Home() {
         id="categories"
         className="mx-auto max-w-7xl px-6 py-16"
       >
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-widest text-gray-400">
-            Explore
-          </p>
+        {/* Section heading */}
+        <div className="mb-8 flex items-end justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gray-400">
+              Explore
+            </p>
 
-          <h2 className="mt-2 text-3xl font-bold tracking-tight">
-            Shop by category
-          </h2>
-        </div>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight">
+              Shop by category
+            </h2>
+          </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-3">
-          <button
-            type="button"
-            onClick={() => setSelectedCategory(null)}
-            className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition ${
-              selectedCategory === null
-                ? "bg-black text-white"
-                : "border border-black/10 bg-white text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            All Products
-          </button>
-
-          {categories.map((category) => (
+          {/* Navigation buttons */}
+          <div className="hidden gap-2 sm:flex">
             <button
               type="button"
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-medium transition ${
-                selectedCategory === category.id
-                  ? "bg-black text-white"
-                  : "border border-black/10 bg-white text-gray-700 hover:bg-gray-100"
+              onClick={() => scrollCategories("left")}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-all duration-300 hover:-translate-x-1 hover:bg-black hover:text-white hover:shadow-md"
+              aria-label="Previous categories"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => scrollCategories("right")}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-all duration-300 hover:translate-x-1 hover:bg-black hover:text-white hover:shadow-md"
+              aria-label="Next categories"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Category carousel */}
+        <div className="relative">
+          {/* Left fade */}
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-[#f8f8f6] to-transparent" />
+
+          {/* Right fade */}
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-[#f8f8f6] to-transparent" />
+
+          <div
+            ref={categoriesRef}
+            className="flex gap-3 overflow-x-auto scroll-smooth pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {/* All products */}
+            <button
+              type="button"
+              onClick={() => setSelectedCategory(null)}
+              className={`shrink-0 rounded-full px-6 py-3 text-sm font-medium transition-all duration-300 ${
+                selectedCategory === null
+                  ? "scale-105 bg-black text-white shadow-lg"
+                  : "border border-black/10 bg-white text-gray-700 hover:-translate-y-0.5 hover:shadow-md"
               }`}
             >
-              {category.name}
+              All Products
             </button>
-          ))}
+
+            {/* Categories */}
+            {categories.map((category) => (
+              <button
+                type="button"
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`shrink-0 rounded-full px-6 py-3 text-sm font-medium transition-all duration-300 ${
+                  selectedCategory === category.id
+                    ? "scale-105 bg-black text-white shadow-lg"
+                    : "border border-black/10 bg-white text-gray-700 hover:-translate-y-0.5 hover:shadow-md"
+                }`}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -211,6 +277,7 @@ export default function Home() {
         id="products"
         className="mx-auto max-w-7xl px-6 pb-24"
       >
+        {/* Products header */}
         <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-gray-400">
@@ -222,6 +289,7 @@ export default function Home() {
             </h2>
           </div>
 
+          {/* Search */}
           <div className="relative w-full md:w-80">
             <Search
               size={18}
@@ -233,11 +301,12 @@ export default function Home() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search products..."
-              className="w-full rounded-full border border-black/10 bg-white py-3 pl-11 pr-5 text-sm outline-none transition focus:border-black"
+              className="w-full rounded-full border border-black/10 bg-white py-3 pl-11 pr-5 text-sm outline-none transition-all duration-300 focus:border-black focus:shadow-md"
             />
           </div>
         </div>
 
+        {/* Loading */}
         {loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((item) => (
@@ -248,25 +317,31 @@ export default function Home() {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
+          /* Empty */
           <div className="rounded-2xl border border-black/5 bg-white px-6 py-20 text-center">
             <p className="text-gray-500">
               No products found.
             </p>
           </div>
         ) : (
+          /* Product grid */
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product, index) => (
               <Link
                 key={product.id}
                 href={`/products/${product.id}`}
-                className="group overflow-hidden rounded-2xl border border-black/5 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="group overflow-hidden rounded-2xl border border-black/5 bg-white opacity-0 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl animate-[fadeUp_0.7s_ease-out_forwards]"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                }}
               >
+                {/* Product image */}
                 <div className="relative aspect-square overflow-hidden bg-gray-100">
                   {product.image ? (
                     <img
                       src={`${process.env.NEXT_PUBLIC_API_URL}${product.image}`}
                       alt={product.name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center text-sm text-gray-400">
@@ -274,11 +349,13 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold backdrop-blur">
+                  {/* New badge */}
+                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold backdrop-blur-xl">
                     New
                   </div>
                 </div>
 
+                {/* Product info */}
                 <div className="p-5">
                   <h3 className="font-semibold text-gray-900">
                     {product.name}
@@ -293,7 +370,7 @@ export default function Home() {
                       {product.price.toLocaleString()} DA
                     </p>
 
-                    <span className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition group-hover:bg-gray-800">
+                    <span className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all duration-300 group-hover:bg-gray-800 group-hover:px-5">
                       View
                     </span>
                   </div>
@@ -325,3 +402,4 @@ export default function Home() {
     </main>
   );
 }
+
