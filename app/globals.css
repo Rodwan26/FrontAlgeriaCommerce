@@ -107,3 +107,18 @@ html {
   scrollbar-width: thin;
   scrollbar-color: #222222 #f8f8f6;
 }
+/* ========================================
+   Algeria Commerce - Animations
+   ======================================== */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

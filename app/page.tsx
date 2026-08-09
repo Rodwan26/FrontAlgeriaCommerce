@@ -326,57 +326,54 @@ export default function Home() {
         ) : (
           /* Product grid */
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {filteredProducts.map((product, index) => (
-              <Link
-                key={product.id}
-                href={`/products/${product.id}`}
-                className="group overflow-hidden rounded-2xl border border-black/5 bg-white opacity-0 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl animate-[fadeUp_0.7s_ease-out_forwards]"
-                style={{
-                  animationDelay: `${index * 100}ms`,
-                }}
-              >
-                {/* Product image */}
-                <div className="relative aspect-square overflow-hidden bg-gray-100">
-                  {product.image ? (
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL}${product.image}`}
-                      alt={product.name}
-                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-gray-400">
-                      No Image
-                    </div>
-                  )}
+           {filteredProducts.map((product, index) => (
+  <Link
+    key={product.id}
+    href={`/products/${product.id}`}
+    className="group overflow-hidden rounded-2xl border border-black/5 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-xl animate-[fadeUp_0.7s_ease-out_forwards]"
+    style={{
+      animationDelay: `${index * 100}ms`,
+    }}
+  >
+    <div className="relative aspect-square overflow-hidden bg-gray-100">
+      {product.image ? (
+        <img
+          src={`${process.env.NEXT_PUBLIC_API_URL}${product.image}`}
+          alt={product.name}
+          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+        />
+      ) : (
+        <div className="flex h-full items-center justify-center text-sm text-gray-400">
+          No Image
+        </div>
+      )}
 
-                  {/* New badge */}
-                  <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold backdrop-blur-xl">
-                    New
-                  </div>
-                </div>
+      <div className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold backdrop-blur-xl">
+        New
+      </div>
+    </div>
 
-                {/* Product info */}
-                <div className="p-5">
-                  <h3 className="font-semibold text-gray-900">
-                    {product.name}
-                  </h3>
+    <div className="p-5">
+      <h3 className="font-semibold text-gray-900">
+        {product.name}
+      </h3>
 
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500">
-                    {product.description}
-                  </p>
+      <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-500">
+        {product.description}
+      </p>
 
-                  <div className="mt-5 flex items-center justify-between">
-                    <p className="text-lg font-bold text-gray-900">
-                      {product.price.toLocaleString()} DA
-                    </p>
+      <div className="mt-5 flex items-center justify-between">
+        <p className="text-lg font-bold text-gray-900">
+          {product.price.toLocaleString()} DA
+        </p>
 
-                    <span className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all duration-300 group-hover:bg-gray-800 group-hover:px-5">
-                      View
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+        <span className="rounded-full bg-black px-4 py-2 text-xs font-semibold text-white transition-all duration-300 group-hover:bg-gray-800 group-hover:px-5">
+          View
+        </span>
+      </div>
+    </div>
+  </Link>
+))}
           </div>
         )}
       </section>
