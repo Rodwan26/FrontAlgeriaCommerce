@@ -197,31 +197,31 @@ export default function Home() {
             </div>
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
+         <nav className="flex items-center gap-3 md:gap-8">
+  <div className="hidden items-center gap-8 md:flex">
+    <a
+      href="#products"
+      className="text-sm font-medium text-gray-600 transition hover:text-black"
+    >
+      Products
+    </a>
 
-            <a
-              href="#products"
-              className="text-sm font-medium text-gray-600 transition hover:text-black"
-            >
-              Products
-            </a>
+    <a
+      href="#categories"
+      className="text-sm font-medium text-gray-600 transition hover:text-black"
+    >
+      Categories
+    </a>
+  </div>
 
-            <a
-              href="#categories"
-              className="text-sm font-medium text-gray-600 transition hover:text-black"
-            >
-              Categories
-            </a>
-
-            <Link
-              href="/cart"
-              className="flex items-center gap-2 rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:bg-black hover:text-white"
-            >
-              <ShoppingCart size={17} />
-              Cart
-            </Link>
-
-          </nav>
+  <Link
+    href="/cart"
+    className="flex shrink-0 items-center gap-2 rounded-full border border-black/10 px-3 py-2 text-sm font-medium transition hover:bg-black hover:text-white sm:px-4"
+  >
+    <ShoppingCart size={17} />
+    <span className="hidden sm:inline">Cart</span>
+  </Link>
+</nav>
 
         </div>
       </header>
