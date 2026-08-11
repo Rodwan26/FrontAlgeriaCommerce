@@ -63,6 +63,8 @@ export default function OrderDetailsPage() {
     }
   }
   async function updateStatus(newStatus: string) {
+  setUpdatingStatus(true);
+
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/orders/${id}/status?status=${newStatus}`,
@@ -89,6 +91,8 @@ export default function OrderDetailsPage() {
     );
   } catch (error) {
     console.error("Failed to update order status:", error);
+  } finally {
+    setUpdatingStatus(false);
   }
 }
 
