@@ -2,6 +2,7 @@
 
 import {
   FormEvent,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -129,6 +130,9 @@ export default function HomePage() {
     useState<DeliveryMethod>("home");
 
   const [orderConfirmed, setOrderConfirmed] =
+    useState(false);
+
+  const [showFloatingCTA, setShowFloatingCTA] =
     useState(false);
 
   /* =====================================================
@@ -270,6 +274,38 @@ export default function HomePage() {
     birthDateIsValid &&
     wilayaCode.length > 0 &&
     communeId.length > 0;
+
+  /* =====================================================
+     FLOATING CTA
+     Appears only after the main hero CTA leaves the viewport.
+  ===================================================== */
+
+  useEffect(() => {
+    const heroOrderButton =
+      document.getElementById("hero-order-cta");
+
+    if (!heroOrderButton) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingCTA(!entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+
+    observer.observe(heroOrderButton);
+
+    return () => observer.disconnect();
+  }, []);
+
+  function scrollToOrder() {
+    document
+      .getElementById("order-section")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+  }
 
   /* =====================================================
      SUBMIT
@@ -881,16 +917,9 @@ export default function HomePage() {
               "
             >
               <button
+                id="hero-order-cta"
                 type="button"
-                onClick={() =>
-                  document
-                    .getElementById(
-                      "order-section"
-                    )
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    })
-                }
+                onClick={scrollToOrder}
                 className="
                   flex
                   items-center
@@ -1214,15 +1243,7 @@ export default function HomePage() {
 
               <button
                 type="button"
-                onClick={() =>
-                  document
-                    .getElementById(
-                      "order-section"
-                    )
-                    ?.scrollIntoView({
-                      behavior: "smooth",
-                    })
-                }
+                onClick={scrollToOrder}
                 className="
                   flex
                   items-center
@@ -2569,6 +2590,121 @@ export default function HomePage() {
       {/* ===================================================
           FOOTER
       =================================================== */}
+
+      {/* ===================================================
+          FLOATING MOBILE / DESKTOP CTA
+          Appears after the hero CTA disappears.
+      =================================================== */}
+
+      {showFloatingCTA && (
+        <div
+          className="
+            fixed
+            bottom-5
+            left-1/2
+            z-[70]
+            w-[calc(100%-2rem)]
+            max-w-md
+            -translate-x-1/2
+            sm:bottom-6
+          "
+        >
+          <button
+            type="button"
+            onClick={scrollToOrder}
+            className="
+              cta-shine
+              group
+              relative
+              flex
+              w-full
+              items-center
+              justify-center
+              gap-3
+              overflow-hidden
+              rounded-full
+              border
+              border-red-300/20
+              bg-[#7f0d16]
+              px-7
+              py-4
+              text-sm
+              font-black
+              text-white
+              shadow-[0_15px_50px_rgba(127,13,22,0.45)]
+              transition-all
+              duration-300
+              hover:-translate-y-1
+              hover:bg-[#98131d]
+              hover:shadow-[0_20px_60px_rgba(127,13,22,0.55)]
+              active:scale-[0.98]
+            "
+          >
+            <span
+              className="
+                absolute
+                inset-0
+                bg-gradient-to-r
+                from-transparent
+                via-white/25
+                to-transparent
+                opacity-0
+                transition-opacity
+                duration-300
+                group-hover:opacity-100
+              "
+            />
+
+            <ShoppingBag
+              size={18}
+              className="relative z-10 transition-transform duration-300 group-hover:scale-110"
+            />
+
+            <span className="relative z-10">
+              {t.store.orderNow}
+            </span>
+
+            <span
+              className="
+                relative
+                z-10
+                rounded-full
+                bg-white/10
+                px-3
+                py-1
+                text-[11px]
+                font-black
+              "
+            >
+              {formatPrice(total)} DA
+            </span>
+          </button>
+        </div>
+      )}
+
+      <style jsx>{`
+        .cta-shine::after {
+          content: "";
+          position: absolute;
+          top: -60%;
+          left: -35%;
+          width: 28%;
+          height: 220%;
+          transform: rotate(18deg);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
+          animation: cta-shimmer 2.8s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        @keyframes cta-shimmer {
+          0%, 35% {
+            left: -35%;
+          }
+          70%, 100% {
+            left: 125%;
+          }
+        }
+      `}</style>
 
       <footer
         className="
