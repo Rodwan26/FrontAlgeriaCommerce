@@ -1,14 +1,19 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
 import {
-  ArrowLeft,
+  FormEvent,
+  useMemo,
+  useState,
+} from "react";
+
+import {
   CalendarDays,
   Check,
   ChevronDown,
   MapPin,
   Phone,
   ShieldCheck,
+  Sparkles,
   User,
 } from "lucide-react";
 
@@ -18,10 +23,6 @@ import {
   translations,
   Language,
 } from "../app/i18n";
-
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type CustomerData = {
   first_name: string;
@@ -39,7 +40,9 @@ export type CustomerData = {
 };
 
 type Props = {
-  onComplete: (customer: CustomerData) => void;
+  onComplete: (
+    customer: CustomerData
+  ) => void;
 };
 
 type Wilaya = {
@@ -55,23 +58,11 @@ type Wilaya = {
   }[];
 };
 
-/* =========================================================
-   DATA
-========================================================= */
-
 const wilayas = locations as Wilaya[];
-
-/* =========================================================
-   COMPONENT
-========================================================= */
 
 export default function CustomerGate({
   onComplete,
 }: Props) {
-  /* -------------------------------------------------------
-     LANGUAGE
-  ------------------------------------------------------- */
-
   const [language, setLanguage] =
     useState<Language>("ar");
 
@@ -79,11 +70,9 @@ export default function CustomerGate({
 
   const isArabic = language === "ar";
 
-  const direction = isArabic ? "rtl" : "ltr";
-
-  /* -------------------------------------------------------
-     FORM STATE
-  ------------------------------------------------------- */
+  const direction = isArabic
+    ? "rtl"
+    : "ltr";
 
   const [firstName, setFirstName] =
     useState("");
@@ -106,26 +95,54 @@ export default function CustomerGate({
   const [submitted, setSubmitted] =
     useState(false);
 
-  /* -------------------------------------------------------
-     SELECTED WILAYA
-  ------------------------------------------------------- */
-
-  const selectedWilaya = useMemo(() => {
-    return wilayas.find(
-      (wilaya) =>
-        String(wilaya.wilayaCode) === wilayaCode
-    );
-  }, [wilayaCode]);
+  const selectedWilaya =
+    useMemo(() => {
+      return wilayas.find(
+        (wilaya) =>
+          String(
+            wilaya.wilayaCode
+          ) === wilayaCode
+      );
+    }, [wilayaCode]);
 
   const communes =
     selectedWilaya?.communes ?? [];
 
-  /* -------------------------------------------------------
-     PHONE VALIDATION
-  ------------------------------------------------------- */
+  const maxBirthDate =
+    useMemo(() => {
+      const today = new Date();
+
+      const date = new Date(
+        today.getFullYear() - 5,
+        today.getMonth(),
+        today.getDate()
+      );
+
+      const year =
+        date.getFullYear();
+
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(2, "0");
+
+      const day =
+        String(
+          date.getDate()
+        ).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }, []);
 
   const phoneIsValid =
-    /^(05|06|07)\d{8}$/.test(phone);
+    /^(05|06|07)\d{8}$/.test(
+      phone
+    );
+
+  const birthDateIsValid =
+    dateOfBirth.length > 0 &&
+    dateOfBirth <=
+      maxBirthDate;
 
   function handlePhoneChange(
     value: string
@@ -138,88 +155,21 @@ export default function CustomerGate({
     );
   }
 
-  /* -------------------------------------------------------
-     WILAYA
-  ------------------------------------------------------- */
-
   function handleWilayaChange(
     value: string
   ) {
     setWilayaCode(value);
 
-    // Reset commune when wilaya changes
     setCommuneId("");
   }
-
-  /* -------------------------------------------------------
-     DATE / AGE
-     
-     Minimum age = 5 years
-  ------------------------------------------------------- */
-
-  function getMaxBirthDate() {
-    const today = new Date();
-
-    const maxDate = new Date(
-      today.getFullYear() - 5,
-      today.getMonth(),
-      today.getDate()
-    );
-
-    const year =
-      maxDate.getFullYear();
-
-    const month = String(
-      maxDate.getMonth() + 1
-    ).padStart(2, "0");
-
-    const day = String(
-      maxDate.getDate()
-    ).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  }
-
-  const maxBirthDate =
-    getMaxBirthDate();
-
-  /* -------------------------------------------------------
-     BIRTH DATE VALIDATION
-  ------------------------------------------------------- */
-
-  const birthDateIsValid =
-    dateOfBirth.length > 0 &&
-    dateOfBirth <= maxBirthDate;
-
-  /* -------------------------------------------------------
-     FORM VALIDATION
-  ------------------------------------------------------- */
-
-  const formIsValid =
-    firstName.trim().length > 0 &&
-    lastName.trim().length > 0 &&
-    phoneIsValid &&
-    birthDateIsValid &&
-    wilayaCode.length > 0 &&
-    communeId.length > 0;
-
-  /* -------------------------------------------------------
-     GET WILAYA NAME
-  ------------------------------------------------------- */
 
   function getWilayaName(
     wilaya: Wilaya
   ) {
-    if (language === "ar") {
-      return wilaya.nameAr;
-    }
-
-    return wilaya.nameFr;
+    return language === "ar"
+      ? wilaya.nameAr
+      : wilaya.nameFr;
   }
-
-  /* -------------------------------------------------------
-     GET COMMUNE NAME
-  ------------------------------------------------------- */
 
   function getCommuneName(
     commune: {
@@ -228,16 +178,18 @@ export default function CustomerGate({
       nameAr: string;
     }
   ) {
-    if (language === "ar") {
-      return commune.nameAr;
-    }
-
-    return commune.nameFr;
+    return language === "ar"
+      ? commune.nameAr
+      : commune.nameFr;
   }
 
-  /* -------------------------------------------------------
-     SUBMIT
-  ------------------------------------------------------- */
+  const formIsValid =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    phoneIsValid &&
+    birthDateIsValid &&
+    wilayaCode.length > 0 &&
+    communeId.length > 0;
 
   function handleSubmit(
     event: FormEvent<HTMLFormElement>
@@ -248,26 +200,12 @@ export default function CustomerGate({
       return;
     }
 
-    /* -----------------------------------------------
-       Extra age protection
-    ----------------------------------------------- */
-
-    if (
-      !dateOfBirth ||
-      dateOfBirth > maxBirthDate
-    ) {
-      return;
-    }
-
-    /* -----------------------------------------------
-       Find selected commune
-    ----------------------------------------------- */
-
     const selectedCommune =
       communes.find(
         (commune) =>
-          String(commune.id) ===
-          communeId
+          String(
+            commune.id
+          ) === communeId
       );
 
     if (
@@ -277,13 +215,7 @@ export default function CustomerGate({
       return;
     }
 
-    /* -----------------------------------------------
-       Submit
-    ----------------------------------------------- */
-
-    setSubmitted(true);
-
-    onComplete({
+    const customer: CustomerData = {
       first_name:
         firstName.trim(),
 
@@ -316,135 +248,313 @@ export default function CustomerGate({
         ),
 
       language,
-    });
-  }
+    };
 
-  /* -------------------------------------------------------
-     HIDE AFTER SUBMIT
-  ------------------------------------------------------- */
+    console.log(
+      "CUSTOMER:",
+      customer
+    );
+
+    setSubmitted(true);
+
+    onComplete(customer);
+  }
 
   if (submitted) {
     return null;
   }
 
-  /* =======================================================
-     UI
-  ======================================================= */
-
   return (
     <main
       dir={direction}
-      className="fixed inset-0 z-[100] flex min-h-screen items-center justify-center overflow-y-auto bg-[#f5f5f3] px-4 py-6 sm:px-6"
+      className="
+        fixed
+        inset-0
+        z-[100]
+        min-h-screen
+        overflow-y-auto
+        bg-[#160b2d]
+        text-white
+      "
     >
-      {/* ===================================================
-          BACKGROUND
-      =================================================== */}
+      {/* BACKGROUND */}
 
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+
         <div
-          className={`absolute -top-40 h-96 w-96 rounded-full bg-black/[0.035] blur-3xl ${
-            isArabic
-              ? "-right-40"
-              : "-left-40"
-          }`}
+          className="
+            absolute
+            -left-32
+            -top-32
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-fuchsia-600/30
+            blur-[100px]
+          "
         />
 
         <div
-          className={`absolute -bottom-40 h-96 w-96 rounded-full bg-black/[0.035] blur-3xl ${
-            isArabic
-              ? "-left-40"
-              : "-right-40"
-          }`}
+          className="
+            absolute
+            -right-32
+            top-1/3
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-violet-600/30
+            blur-[100px]
+          "
         />
+
+        <div
+          className="
+            absolute
+            -bottom-40
+            left-1/3
+            h-[420px]
+            w-[420px]
+            rounded-full
+            bg-orange-500/20
+            blur-[110px]
+          "
+        />
+
       </div>
 
-      {/* ===================================================
-          CONTAINER
-      =================================================== */}
+      <div
+        className="
+          relative
+          mx-auto
+          w-full
+          max-w-2xl
+          px-4
+          py-5
+          sm:px-6
+          sm:py-8
+        "
+      >
 
-      <div className="relative w-full max-w-2xl">
+        {/* TOP BAR */}
 
-        {/* =================================================
-            LANGUAGE SWITCHER
-        ================================================= */}
+        <div className="mb-7 flex items-center justify-between">
 
-        <div
-          className={`mb-5 flex ${
-            isArabic
-              ? "justify-end"
-              : "justify-end"
-          }`}
-        >
-          <div className="flex rounded-xl border border-black/10 bg-white p-1 shadow-sm">
+          <div className="flex items-center gap-3">
+
+            <div
+              className="
+                flex
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-2xl
+                bg-gradient-to-br
+                from-fuchsia-500
+                to-violet-600
+                text-xs
+                font-black
+                shadow-lg
+                shadow-fuchsia-900/30
+              "
+            >
+              AC
+            </div>
+
+            <div className="hidden sm:block">
+
+              <p className="text-sm font-black">
+                Algeria Commerce
+              </p>
+
+              <p className="text-[10px] font-medium text-white/50">
+                SHOPPING EXPERIENCE
+              </p>
+
+            </div>
+
+          </div>
+
+          {/* LANGUAGE */}
+
+          <div
+            className="
+              flex
+              rounded-2xl
+              border
+              border-white/10
+              bg-white/10
+              p-1
+              backdrop-blur-xl
+            "
+          >
 
             {(
               ["ar", "fr", "en"] as Language[]
             ).map((lang) => (
+
               <button
                 key={lang}
                 type="button"
                 onClick={() =>
                   setLanguage(lang)
                 }
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  language === lang
-                    ? "bg-black text-white"
-                    : "text-gray-500 hover:bg-gray-100"
-                }`}
+                className={`
+                  min-w-[42px]
+                  rounded-xl
+                  px-2.5
+                  py-2
+                  text-[11px]
+                  font-black
+                  transition-all
+                  ${
+                    language === lang
+                      ? "bg-white text-[#27103f] shadow-lg"
+                      : "text-white/60 hover:bg-white/10 hover:text-white"
+                  }
+                `}
               >
                 {lang === "ar"
-                  ? "العربية"
+                  ? "AR"
                   : lang === "fr"
                   ? "FR"
                   : "EN"}
               </button>
+
             ))}
 
           </div>
+
         </div>
 
-        {/* =================================================
-            BRAND
-        ================================================= */}
+        {/* INTRO */}
 
         <div className="mb-6 text-center">
 
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-black text-sm font-bold text-white shadow-lg">
-            AC
+          <div
+            className="
+              mx-auto
+              mb-5
+              flex
+              h-16
+              w-16
+              items-center
+              justify-center
+              rounded-[22px]
+              bg-gradient-to-br
+              from-orange-400
+              to-pink-500
+              shadow-xl
+              shadow-orange-900/20
+            "
+          >
+            <Sparkles size={25} />
           </div>
 
-          <p className="mt-3 text-xs font-semibold tracking-[0.18em] text-gray-400">
+          <p
+            className="
+              text-[10px]
+              font-black
+              uppercase
+              tracking-[0.25em]
+              text-fuchsia-300
+            "
+          >
             ALGERIA COMMERCE
+          </p>
+
+          <h1
+            className="
+              mt-3
+              text-3xl
+              font-black
+              tracking-tight
+              sm:text-4xl
+            "
+          >
+            {t.customerGate.title}
+          </h1>
+
+          <p
+            className="
+              mx-auto
+              mt-3
+              max-w-md
+              text-sm
+              leading-7
+              text-white/55
+            "
+          >
+            {t.customerGate.description}
           </p>
 
         </div>
 
-        {/* =================================================
-            CARD
-        ================================================= */}
+        {/* CARD */}
 
-        <div className="overflow-hidden rounded-[2rem] border border-black/[0.06] bg-white shadow-[0_25px_80px_rgba(0,0,0,0.10)]">
+        <div
+          className="
+            overflow-hidden
+            rounded-[2rem]
+            border
+            border-white/10
+            bg-white/[0.08]
+            shadow-[0_30px_100px_rgba(0,0,0,0.35)]
+            backdrop-blur-2xl
+          "
+        >
 
-          {/* =================================================
-              HEADER
-          ================================================= */}
+          {/* CARD HEADER */}
 
-          <div className="border-b border-black/[0.06] px-6 py-7 sm:px-9">
+          <div
+            className="
+              border-b
+              border-white/10
+              bg-gradient-to-r
+              from-fuchsia-500/10
+              via-violet-500/10
+              to-orange-500/10
+              px-5
+              py-5
+              sm:px-8
+            "
+          >
 
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-3">
 
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-black text-white">
-                <User size={19} />
+              <div
+                className="
+                  flex
+                  h-10
+                  w-10
+                  items-center
+                  justify-center
+                  rounded-xl
+                  bg-gradient-to-br
+                  from-fuchsia-500
+                  to-violet-600
+                  shadow-lg
+                "
+              >
+                <MapPin size={17} />
               </div>
 
               <div>
 
-                <h1 className="text-xl font-bold tracking-tight text-gray-950 sm:text-2xl">
-                  {t.customerGate.title}
-                </h1>
+                <p className="text-sm font-black">
+                  {language === "ar"
+                    ? "لنجهز تجربة التسوق"
+                    : language === "fr"
+                    ? "Préparons votre expérience"
+                    : "Let's prepare your experience"}
+                </p>
 
-                <p className="mt-1.5 text-sm leading-6 text-gray-500">
-                  {t.customerGate.description}
+                <p className="mt-1 text-[11px] text-white/45">
+                  {language === "ar"
+                    ? "معلومات بسيطة فقط"
+                    : language === "fr"
+                    ? "Quelques informations seulement"
+                    : "Just a few details"}
                 </p>
 
               </div>
@@ -453,242 +563,217 @@ export default function CustomerGate({
 
           </div>
 
-          {/* =================================================
-              FORM
-          ================================================= */}
+          {/* FORM */}
 
           <form
             onSubmit={handleSubmit}
-            className="space-y-5 px-6 py-7 sm:px-9 sm:py-8"
+            className="
+              space-y-6
+              px-5
+              py-6
+              sm:px-8
+              sm:py-8
+            "
           >
 
-            {/* =================================================
-                NAME
-            ================================================= */}
+            {/* NAME */}
 
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
 
-              {/* First name */}
-
-              <Field
-                label={t.customerGate.firstName}
-                icon={<User size={17} />}
-                required
+              <InputField
+                label={
+                  t.customerGate.firstName
+                }
+                icon={
+                  <User size={15} />
+                }
               >
-                <div className="relative">
 
-                  <input
-                    required
-                    type="text"
-                    value={firstName}
-                    onChange={(event) =>
-                      setFirstName(
-                        event.target.value
-                      )
-                    }
-                    placeholder={
-                      t.customerGate
-                        .firstNamePlaceholder
-                    }
-                    className={inputClass}
-                  />
+                <input
+                  required
+                  type="text"
+                  value={firstName}
+                  onChange={(e) =>
+                    setFirstName(
+                      e.target.value
+                    )
+                  }
+                  placeholder={
+                    t.customerGate
+                      .firstNamePlaceholder
+                  }
+                  className={inputClass}
+                />
 
-                  <User
-                    size={17}
-                    className={iconClass}
-                  />
+              </InputField>
 
-                </div>
-              </Field>
-
-              {/* Last name */}
-
-              <Field
-                label={t.customerGate.lastName}
-                icon={<User size={17} />}
-                required
+              <InputField
+                label={
+                  t.customerGate.lastName
+                }
+                icon={
+                  <User size={15} />
+                }
               >
-                <div className="relative">
 
-                  <input
-                    required
-                    type="text"
-                    value={lastName}
-                    onChange={(event) =>
-                      setLastName(
-                        event.target.value
-                      )
-                    }
-                    placeholder={
-                      t.customerGate
-                        .lastNamePlaceholder
-                    }
-                    className={inputClass}
-                  />
+                <input
+                  required
+                  type="text"
+                  value={lastName}
+                  onChange={(e) =>
+                    setLastName(
+                      e.target.value
+                    )
+                  }
+                  placeholder={
+                    t.customerGate
+                      .lastNamePlaceholder
+                  }
+                  className={inputClass}
+                />
 
-                  <User
-                    size={17}
-                    className={iconClass}
-                  />
-
-                </div>
-              </Field>
+              </InputField>
 
             </div>
 
-            {/* =================================================
-                PHONE + BIRTH DATE
-            ================================================= */}
+            {/* PHONE + DATE */}
 
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
 
-              {/* Phone */}
-
-              <Field
-                label={t.customerGate.phone}
-                icon={<Phone size={17} />}
-                required
+              <InputField
+                label={
+                  t.customerGate.phone
+                }
+                icon={
+                  <Phone size={15} />
+                }
               >
-                <div className="relative">
 
-                  <input
-                    required
-                    type="tel"
-                    inputMode="numeric"
-                    value={phone}
-                    onChange={(event) =>
-                      handlePhoneChange(
-                        event.target.value
-                      )
-                    }
-                    placeholder={
-                      t.customerGate
-                        .phonePlaceholder
-                    }
-                    maxLength={10}
-                    className={`${inputClass} ${
+                <input
+                  required
+                  type="tel"
+                  inputMode="numeric"
+                  value={phone}
+                  onChange={(e) =>
+                    handlePhoneChange(
+                      e.target.value
+                    )
+                  }
+                  placeholder={
+                    t.customerGate
+                      .phonePlaceholder
+                  }
+                  maxLength={10}
+                  className={`
+                    ${inputClass}
+                    ${
                       phone.length > 0 &&
                       !phoneIsValid
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500/5"
+                        ? "border-red-400/70 focus:border-red-400"
                         : ""
-                    }`}
-                  />
-
-                  <Phone
-                    size={17}
-                    className={iconClass}
-                  />
-
-                </div>
-
-                {/* Invalid phone */}
+                    }
+                  `}
+                />
 
                 {phone.length > 0 &&
                   !phoneIsValid && (
-                    <p className="mt-2 text-xs font-medium text-red-500">
+
+                    <p className="mt-2 text-[11px] font-medium text-red-300">
                       {
                         t.customerGate
                           .phoneError
                       }
                     </p>
+
                   )}
 
-                {/* Valid phone */}
-
                 {phoneIsValid && (
+
                   <p
-                    className={`mt-2 flex items-center gap-1 text-xs font-medium text-green-600 ${
-                      isArabic
-                        ? "justify-start"
-                        : "justify-start"
-                    }`}
+                    className="
+                      mt-2
+                      flex
+                      items-center
+                      gap-1
+                      text-[11px]
+                      font-semibold
+                      text-emerald-300
+                    "
                   >
-                    <Check size={13} />
+                    <Check size={12} />
 
                     {
                       t.customerGate
                         .phoneValid
                     }
                   </p>
+
                 )}
 
-              </Field>
+              </InputField>
 
-              {/* Birth date */}
-
-              <Field
+              <InputField
                 label={
                   t.customerGate.dateOfBirth
                 }
                 icon={
-                  <CalendarDays size={17} />
+                  <CalendarDays size={15} />
                 }
-                required
               >
-                <div className="relative">
 
-                  <input
-                    required
-                    type="date"
-                    value={dateOfBirth}
-                    max={maxBirthDate}
-                    onChange={(event) =>
-                      setDateOfBirth(
-                        event.target.value
-                      )
-                    }
-                    className={inputClass}
-                  />
+                <input
+                  required
+                  type="date"
+                  value={dateOfBirth}
+                  max={maxBirthDate}
+                  onChange={(e) =>
+                    setDateOfBirth(
+                      e.target.value
+                    )
+                  }
+                  className={inputClass}
+                />
 
-                  <CalendarDays
-                    size={17}
-                    className={iconClass}
-                  />
-
-                </div>
-
-                {/* Age error */}
-
-                {dateOfBirth.length > 0 &&
+                {dateOfBirth &&
                   !birthDateIsValid && (
-                    <p className="mt-2 text-xs font-medium text-red-500">
+
+                    <p className="mt-2 text-[11px] text-red-300">
                       {
                         t.customerGate
                           .birthDateError
                       }
                     </p>
+
                   )}
 
-              </Field>
+              </InputField>
 
             </div>
 
-            {/* =================================================
-                LOCATION
-            ================================================= */}
+            {/* LOCATION */}
 
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
 
-              {/* Wilaya */}
-
-              <Field
+              <InputField
                 label={
                   t.customerGate.wilaya
                 }
-                icon={<MapPin size={17} />}
-                required
+                icon={
+                  <MapPin size={15} />
+                }
               >
+
                 <div className="relative">
 
                   <select
                     required
                     value={wilayaCode}
-                    onChange={(event) =>
+                    onChange={(e) =>
                       handleWilayaChange(
-                        event.target.value
+                        e.target.value
                       )
                     }
-                    className={`${inputClass} appearance-none`}
+                    className={`${inputClass} appearance-none pe-11`}
                   >
 
                     <option value="">
@@ -700,6 +785,7 @@ export default function CustomerGate({
 
                     {wilayas.map(
                       (wilaya) => (
+
                         <option
                           key={
                             wilaya.wilayaCode
@@ -712,51 +798,53 @@ export default function CustomerGate({
                             wilaya
                           )}
                         </option>
+
                       )
                     )}
 
                   </select>
 
-                  <MapPin
-                    size={17}
-                    className={iconClass}
-                  />
-
                   <ChevronDown
-                    size={17}
+                    size={16}
                     className={selectArrowClass}
                   />
 
                 </div>
-              </Field>
 
-              {/* Commune */}
+              </InputField>
 
-              <Field
+              <InputField
                 label={
                   t.customerGate.commune
                 }
-                icon={<MapPin size={17} />}
-                required
+                icon={
+                  <MapPin size={15} />
+                }
               >
+
                 <div className="relative">
 
                   <select
                     required
-                    value={communeId}
                     disabled={
                       !selectedWilaya
                     }
-                    onChange={(event) =>
+                    value={communeId}
+                    onChange={(e) =>
                       setCommuneId(
-                        event.target.value
+                        e.target.value
                       )
                     }
-                    className={`${inputClass} appearance-none ${
-                      !selectedWilaya
-                        ? "cursor-not-allowed bg-gray-100 text-gray-400"
-                        : ""
-                    }`}
+                    className={`
+                      ${inputClass}
+                      appearance-none
+                      pe-11
+                      ${
+                        !selectedWilaya
+                          ? "cursor-not-allowed opacity-50"
+                          : ""
+                      }
+                    `}
                   >
 
                     <option value="">
@@ -768,86 +856,184 @@ export default function CustomerGate({
                     </option>
 
                     {communes.map(
-                      (commune, index) => (
+                      (commune) => (
+
                         <option
-                          key={`${commune.id}-${index}`}
+                          key={`${wilayaCode}-${commune.id}`}
                           value={commune.id}
                         >
                           {getCommuneName(
                             commune
                           )}
                         </option>
+
                       )
                     )}
 
                   </select>
 
-                  <MapPin
-                    size={17}
-                    className={iconClass}
-                  />
-
                   <ChevronDown
-                    size={17}
+                    size={16}
                     className={selectArrowClass}
                   />
 
                 </div>
-              </Field>
+
+              </InputField>
 
             </div>
 
-            {/* =================================================
-                PRIVACY
-            ================================================= */}
+            {/* PRIVACY */}
 
-            <div className="flex gap-3 rounded-2xl bg-[#f7f7f5] p-4">
+            <div
+              className="
+                flex
+                gap-3
+                rounded-2xl
+                border
+                border-white/10
+                bg-white/[0.05]
+                p-4
+              "
+            >
 
               <ShieldCheck
                 size={18}
-                className="mt-0.5 shrink-0 text-gray-500"
+                className="
+                  mt-0.5
+                  shrink-0
+                  text-fuchsia-300
+                "
               />
 
-              <p className="text-xs leading-5 text-gray-500">
-                {
-                  t.customerGate
-                    .privacy
-                }
+              <p
+                className="
+                  text-[11px]
+                  leading-6
+                  text-white/50
+                "
+              >
+                {t.customerGate.privacy}
               </p>
 
             </div>
 
-            {/* =================================================
-                SUBMIT
-            ================================================= */}
+            {/* PROGRESS */}
+
+            <div className="flex items-center gap-3">
+
+              <div
+                className="
+                  h-1.5
+                  flex-1
+                  overflow-hidden
+                  rounded-full
+                  bg-white/10
+                "
+              >
+
+                <div
+                  className={`
+                    h-full
+                    rounded-full
+                    bg-gradient-to-r
+                    from-fuchsia-500
+                    via-violet-500
+                    to-orange-400
+                    transition-all
+                    duration-500
+                    ${
+                      formIsValid
+                        ? "w-full"
+                        : "w-2/3"
+                    }
+                  `}
+                />
+
+              </div>
+
+              <span className="text-[10px] font-semibold text-white/40">
+                {formIsValid
+                  ? language === "ar"
+                    ? "جاهز"
+                    : language === "fr"
+                    ? "Prêt"
+                    : "Ready"
+                  : language === "ar"
+                  ? "معلوماتك"
+                  : language === "fr"
+                  ? "Vos informations"
+                  : "Your details"}
+              </span>
+
+            </div>
+
+            {/* CTA */}
 
             <button
               type="submit"
               disabled={!formIsValid}
-              className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-black px-6 py-4 text-sm font-bold text-white shadow-lg shadow-black/10 transition-all duration-300 hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-xl disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none"
+              className="
+                group
+                flex
+                w-full
+                items-center
+                justify-center
+                gap-3
+                rounded-2xl
+                bg-gradient-to-r
+                from-orange-400
+                via-pink-500
+                to-fuchsia-600
+                px-6
+                py-4
+                text-sm
+                font-black
+                text-white
+                shadow-[0_15px_40px_rgba(217,70,239,0.25)]
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:shadow-[0_20px_50px_rgba(217,70,239,0.35)]
+                disabled:cursor-not-allowed
+                disabled:bg-white/10
+                disabled:bg-none
+                disabled:text-white/30
+                disabled:shadow-none
+              "
             >
 
-              {t.customerGate.continue}
+              <span>
+                {
+                  t.customerGate
+                    .continue
+                }
+              </span>
 
-              <ArrowLeft
+              <Sparkles
                 size={17}
-                className={`transition-transform duration-300 group-hover:-translate-x-1 ${
-                  !isArabic
-                    ? "rotate-180"
-                    : ""
-                }`}
+                className="
+                  transition-transform
+                  duration-300
+                  group-hover:rotate-12
+                  group-hover:scale-110
+                "
               />
 
             </button>
 
-            {/* =================================================
-                NO ACCOUNT
-            ================================================= */}
+            {/* NO ACCOUNT */}
 
-            <p className="text-center text-xs text-gray-400">
+            <p
+              className="
+                text-center
+                text-[11px]
+                leading-5
+                text-white/35
+              "
+            >
               {
-                t.customerGate
-                  .noAccount
+                t.customerGate.noAccount
               }
             </p>
 
@@ -855,40 +1041,64 @@ export default function CustomerGate({
 
         </div>
 
-        {/* =================================================
-            FOOTER
-        ================================================= */}
+        {/* FOOTER */}
 
-        <p className="mt-5 text-center text-xs text-gray-400">
-          Algeria Commerce
-        </p>
+        <div
+          className="
+            mt-5
+            flex
+            items-center
+            justify-center
+            gap-2
+            text-[10px]
+            font-medium
+            text-white/30
+          "
+        >
+
+          <ShieldCheck size={12} />
+
+          <span>
+            {language === "ar"
+              ? "تجربة تسوق بسيطة وآمنة"
+              : language === "fr"
+              ? "Expérience d'achat simple et sécurisée"
+              : "Simple and secure shopping experience"}
+          </span>
+
+        </div>
 
       </div>
+
     </main>
   );
 }
 
-/* =========================================================
-   FIELD COMPONENT
-========================================================= */
-
-function Field({
+function InputField({
   label,
   icon,
   children,
-  required = false,
 }: {
   label: string;
   icon: React.ReactNode;
   children: React.ReactNode;
-  required?: boolean;
 }) {
   return (
     <div>
 
-      <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-800">
+      <label
+        className="
+          mb-2
+          flex
+          items-center
+          gap-2
+          text-xs
+          font-bold
+          text-white/75
+        "
+      >
 
-        <span className="text-gray-400">
+        <span className="text-fuchsia-300">
           {icon}
         </span>
 
@@ -896,11 +1106,9 @@ function Field({
           {label}
         </span>
 
-        {required && (
-          <span className="text-red-500">
-            *
-          </span>
-        )}
+        <span className="text-orange-300">
+          *
+        </span>
 
       </label>
 
@@ -910,36 +1118,31 @@ function Field({
   );
 }
 
-/* =========================================================
-   STYLES
-========================================================= */
+const inputClass = `
+  w-full
+  rounded-2xl
+  border
+  border-white/10
+  bg-white/[0.07]
+  px-4
+  py-3.5
+  text-sm
+  text-white
+  outline-none
+  transition-all
+  duration-200
+  placeholder:text-white/25
+  focus:border-fuchsia-400/70
+  focus:bg-white/[0.10]
+  focus:ring-4
+  focus:ring-fuchsia-500/10
+`;
 
-/*
-  مهم:
-
-  padding-right: 44px
-  يترك مساحة للأيقونة في RTL.
-
-  وفي LTR نقوم بتعديل الاتجاه بواسطة CSS
-  داخل الـ input نفسه.
-*/
-
-const inputClass =
-  "w-full rounded-2xl border border-black/10 bg-gray-50 px-4 py-3.5 pr-11 text-sm text-gray-900 outline-none transition-all duration-200 placeholder:text-gray-400 focus:border-black focus:bg-white focus:ring-4 focus:ring-black/[0.05]";
-
-/*
-  Icon position.
-
-  بما أن التصميم الأساسي RTL:
-  الأيقونة على اليمين.
-*/
-
-const iconClass =
-  "pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400";
-
-/*
-  Arrow for select.
-*/
-
-const selectArrowClass =
-  "pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400";
+const selectArrowClass = `
+  pointer-events-none
+  absolute
+  end-4
+  top-1/2
+  -translate-y-1/2
+  text-white/40
+`;
