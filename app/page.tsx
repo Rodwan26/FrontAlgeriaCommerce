@@ -4,6 +4,7 @@ import {
   FormEvent,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -132,8 +133,56 @@ export default function HomePage() {
   const [orderConfirmed, setOrderConfirmed] =
     useState(false);
 
-  const [showFloatingCTA, setShowFloatingCTA] =
+  /* =====================================================
+     STICKY CTA
+  ===================================================== */
+
+  const heroOrderButtonRef =
+    useRef<HTMLButtonElement | null>(null);
+
+  const [showStickyCTA, setShowStickyCTA] =
     useState(false);
+
+  useEffect(() => {
+    const button =
+      heroOrderButtonRef.current;
+
+    if (!button) return;
+
+    const observer =
+      new IntersectionObserver(
+        ([entry]) => {
+          /*
+            إذا كان زر Hero ظاهرًا:
+            نخفي الزر العائم.
+
+            إذا خرج من الشاشة:
+            نظهر الزر العائم.
+          */
+          setShowStickyCTA(
+            !entry.isIntersecting
+          );
+        },
+        {
+          threshold: 0.15,
+        }
+      );
+
+    observer.observe(button);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  function scrollToOrder() {
+    document
+      .getElementById("order-section")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+  }
 
   /* =====================================================
      LOCATION
@@ -196,7 +245,7 @@ export default function HomePage() {
   }
 
   /* =====================================================
-     LOCATION
+     LOCATION HELPERS
   ===================================================== */
 
   function handleWilayaChange(
@@ -253,7 +302,8 @@ export default function HomePage() {
     PRODUCT.price * quantity;
 
   const total =
-    productTotal + deliveryPrice;
+    productTotal +
+    deliveryPrice;
 
   function formatPrice(
     value: number
@@ -274,38 +324,6 @@ export default function HomePage() {
     birthDateIsValid &&
     wilayaCode.length > 0 &&
     communeId.length > 0;
-
-  /* =====================================================
-     FLOATING CTA
-     Appears only after the main hero CTA leaves the viewport.
-  ===================================================== */
-
-  useEffect(() => {
-    const heroOrderButton =
-      document.getElementById("hero-order-cta");
-
-    if (!heroOrderButton) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setShowFloatingCTA(!entry.isIntersecting);
-      },
-      { threshold: 0.15 }
-    );
-
-    observer.observe(heroOrderButton);
-
-    return () => observer.disconnect();
-  }, []);
-
-  function scrollToOrder() {
-    document
-      .getElementById("order-section")
-      ?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-  }
 
   /* =====================================================
      SUBMIT
@@ -381,12 +399,9 @@ export default function HomePage() {
 
       product: {
         name: PRODUCT.name,
-
         quantity,
-
         unit_price:
           PRODUCT.price,
-
         product_total:
           productTotal,
       },
@@ -394,7 +409,6 @@ export default function HomePage() {
       delivery: {
         method:
           deliveryMethod,
-
         price:
           deliveryPrice,
       },
@@ -637,6 +651,7 @@ export default function HomePage() {
         text-white
       "
     >
+
       {/* ===================================================
           HEADER
       =================================================== */}
@@ -666,8 +681,6 @@ export default function HomePage() {
             lg:px-8
           "
         >
-          {/* BRAND */}
-
           <div className="flex items-center gap-3">
             <div
               className="
@@ -696,8 +709,6 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-
-          {/* LANGUAGE */}
 
           <div
             className="
@@ -756,8 +767,6 @@ export default function HomePage() {
           sm:min-h-[850px]
         "
       >
-        {/* VIDEO */}
-
         <video
           autoPlay
           muted
@@ -778,8 +787,6 @@ export default function HomePage() {
           />
         </video>
 
-        {/* DARK OVERLAY */}
-
         <div
           className="
             absolute
@@ -787,8 +794,6 @@ export default function HomePage() {
             bg-black/45
           "
         />
-
-        {/* GRADIENT */}
 
         <div
           className="
@@ -812,8 +817,6 @@ export default function HomePage() {
           "
         />
 
-        {/* ORANGE LIGHT */}
-
         <div
           className="
             absolute
@@ -827,8 +830,6 @@ export default function HomePage() {
             blur-[130px]
           "
         />
-
-        {/* CONTENT */}
 
         <div
           className="
@@ -849,6 +850,7 @@ export default function HomePage() {
           "
         >
           <div className="max-w-3xl">
+
             <div
               className="
                 mb-6
@@ -916,8 +918,13 @@ export default function HomePage() {
                 sm:flex-row
               "
             >
+              {/* ==========================================
+                  HERO ORDER BUTTON
+                  هذا هو الزر الذي نراقبه
+              ========================================== */}
+
               <button
-                id="hero-order-cta"
+                ref={heroOrderButtonRef}
                 type="button"
                 onClick={scrollToOrder}
                 className="
@@ -980,8 +987,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* SCROLL */}
-
         <div
           className="
             absolute
@@ -1008,7 +1013,102 @@ export default function HomePage() {
       </section>
 
       {/* ===================================================
-          MARQUEE / STATEMENT
+          STICKY MOBILE / DESKTOP CTA
+      =================================================== */}
+
+      <div
+        className={`
+          fixed
+          bottom-5
+          left-1/2
+          z-[100]
+          w-[calc(100%-24px)]
+          max-w-md
+          -translate-x-1/2
+          transition-all
+          duration-500
+          ${
+            showStickyCTA
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-8 opacity-0"
+          }
+        `}
+      >
+        <button
+          type="button"
+          onClick={scrollToOrder}
+          className="
+            sticky-order-button
+            relative
+            flex
+            w-full
+            items-center
+            justify-center
+            gap-3
+            overflow-hidden
+            rounded-2xl
+            border
+            border-red-400/30
+            bg-[#8f1111]
+            px-6
+            py-4
+            text-sm
+            font-black
+            text-white
+            shadow-[0_15px_50px_rgba(127,29,29,0.55)]
+            transition-all
+            duration-300
+            hover:-translate-y-1
+            hover:bg-[#a51414]
+            active:scale-[0.98]
+          "
+        >
+          {/* shine */}
+
+          <span
+            className="
+              pointer-events-none
+              absolute
+              inset-y-0
+              -left-1/2
+              w-1/3
+              rotate-12
+              bg-gradient-to-r
+              from-transparent
+              via-white/30
+              to-transparent
+              blur-sm
+              sticky-shine
+            "
+          />
+
+          <ShoppingBag
+            size={19}
+            className="relative z-10"
+          />
+
+          <span className="relative z-10">
+            {t.store.orderNow}
+          </span>
+
+          <span
+            className="
+              relative
+              z-10
+              rounded-lg
+              bg-black/20
+              px-2.5
+              py-1
+              text-xs
+            "
+          >
+            {formatPrice(total)} DA
+          </span>
+        </button>
+      </div>
+
+      {/* ===================================================
+          MARQUEE
       =================================================== */}
 
       <section
@@ -1034,15 +1134,21 @@ export default function HomePage() {
           "
         >
           <span>RUN</span>
-          <span className="text-orange-400">●</span>
+          <span className="text-orange-400">
+            ●
+          </span>
           <span>MOVE</span>
           <span>●</span>
           <span>PERFORM</span>
-          <span className="text-orange-400">●</span>
+          <span className="text-orange-400">
+            ●
+          </span>
           <span>COMFORT</span>
           <span>●</span>
           <span>RUN</span>
-          <span className="text-orange-400">●</span>
+          <span className="text-orange-400">
+            ●
+          </span>
           <span>MOVE</span>
           <span>●</span>
           <span>PERFORM</span>
@@ -1073,8 +1179,6 @@ export default function HomePage() {
             lg:items-center
           "
         >
-          {/* IMAGE */}
-
           <div
             className="
               group
@@ -1133,8 +1237,6 @@ export default function HomePage() {
               HOKA
             </div>
           </div>
-
-          {/* CONTENT */}
 
           <div>
             <p
@@ -1276,7 +1378,7 @@ export default function HomePage() {
       </section>
 
       {/* ===================================================
-          EMOTION SECTION
+          EMOTION
       =================================================== */}
 
       <section
@@ -1290,12 +1392,7 @@ export default function HomePage() {
           sm:py-32
         "
       >
-        <div
-          className="
-            mx-auto
-            max-w-7xl
-          "
-        >
+        <div className="mx-auto max-w-7xl">
           <div
             className="
               grid
@@ -1350,8 +1447,6 @@ export default function HomePage() {
                 : "Movement is more than training. It is a feeling, energy and confidence in every step."}
             </p>
           </div>
-
-          {/* IMAGE GRID */}
 
           <div
             className="
@@ -1545,6 +1640,7 @@ export default function HomePage() {
             >
               FEEL THE
               <br />
+
               <span className="text-orange-400">
                 DIFFERENCE.
               </span>
@@ -1600,6 +1696,7 @@ export default function HomePage() {
                 <br />
                 FOR
                 <br />
+
                 <span className="text-orange-400">
                   MOVEMENT.
                 </span>
@@ -1794,6 +1891,7 @@ export default function HomePage() {
         "
       >
         <div className="mx-auto max-w-3xl">
+
           <div className="text-center">
             <p
               className="
@@ -1838,6 +1936,7 @@ export default function HomePage() {
                 shadow-[0_30px_100px_rgba(0,0,0,0.08)]
               "
             >
+
               {/* PRODUCT MINI */}
 
               <div
@@ -1890,6 +1989,7 @@ export default function HomePage() {
               </div>
 
               <div className="p-5 sm:p-8">
+
                 {/* QUANTITY */}
 
                 <div>
@@ -1901,10 +2001,8 @@ export default function HomePage() {
 
                       <p className="mt-1 text-xs text-black/40">
                         {quantity === 10
-                          ? t.store
-                              .maximumQuantity
-                          : t.store
-                              .minimumQuantity}
+                          ? t.store.maximumQuantity
+                          : t.store.minimumQuantity}
                       </p>
                     </div>
 
@@ -2012,8 +2110,7 @@ export default function HomePage() {
                         <Home size={18} />
                       }
                       title={
-                        t.store
-                          .homeDelivery
+                        t.store.homeDelivery
                       }
                       description={
                         t.store
@@ -2038,13 +2135,10 @@ export default function HomePage() {
                         )
                       }
                       icon={
-                        <Package
-                          size={18}
-                        />
+                        <Package size={18} />
                       }
                       title={
-                        t.store
-                          .officeDelivery
+                        t.store.officeDelivery
                       }
                       description={
                         t.store
@@ -2123,9 +2217,7 @@ export default function HomePage() {
                       <input
                         required
                         type="text"
-                        value={
-                          firstName
-                        }
+                        value={firstName}
                         onChange={(e) =>
                           setFirstName(
                             e.target.value
@@ -2153,9 +2245,7 @@ export default function HomePage() {
                       <input
                         required
                         type="text"
-                        value={
-                          lastName
-                        }
+                        value={lastName}
                         onChange={(e) =>
                           setLastName(
                             e.target.value
@@ -2208,8 +2298,7 @@ export default function HomePage() {
                         className={`
                           ${lightInputClass}
                           ${
-                            phone.length >
-                              0 &&
+                            phone.length > 0 &&
                             !phoneIsValid
                               ? "border-red-400"
                               : ""
@@ -2217,13 +2306,11 @@ export default function HomePage() {
                         `}
                       />
 
-                      {phone.length >
-                        0 &&
+                      {phone.length > 0 &&
                         !phoneIsValid && (
                           <p className="mt-2 text-[11px] text-red-500">
                             {
-                              t
-                                .customerGate
+                              t.customerGate
                                 .phoneError
                             }
                           </p>
@@ -2244,8 +2331,7 @@ export default function HomePage() {
                           <Check size={12} />
 
                           {
-                            t
-                              .customerGate
+                            t.customerGate
                               .phoneValid
                           }
                         </p>
@@ -2313,8 +2399,7 @@ export default function HomePage() {
                           }
                           onChange={(e) =>
                             handleWilayaChange(
-                              e.target
-                                .value
+                              e.target.value
                             )
                           }
                           className={`
@@ -2325,8 +2410,7 @@ export default function HomePage() {
                         >
                           <option value="">
                             {
-                              t
-                                .customerGate
+                              t.customerGate
                                 .wilayaPlaceholder
                             }
                           </option>
@@ -2385,8 +2469,7 @@ export default function HomePage() {
                           }
                           onChange={(e) =>
                             setCommuneId(
-                              e.target
-                                .value
+                              e.target.value
                             )
                           }
                           className={`
@@ -2402,11 +2485,9 @@ export default function HomePage() {
                         >
                           <option value="">
                             {selectedWilaya
-                              ? t
-                                  .customerGate
+                              ? t.customerGate
                                   .communePlaceholder
-                              : t
-                                  .customerGate
+                              : t.customerGate
                                   .selectWilayaFirst}
                           </option>
 
@@ -2514,7 +2595,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* CTA */}
+                {/* REAL ORDER BUTTON */}
 
                 <button
                   type="submit"
@@ -2591,121 +2672,6 @@ export default function HomePage() {
           FOOTER
       =================================================== */}
 
-      {/* ===================================================
-          FLOATING MOBILE / DESKTOP CTA
-          Appears after the hero CTA disappears.
-      =================================================== */}
-
-      {showFloatingCTA && (
-        <div
-          className="
-            fixed
-            bottom-5
-            left-1/2
-            z-[70]
-            w-[calc(100%-2rem)]
-            max-w-md
-            -translate-x-1/2
-            sm:bottom-6
-          "
-        >
-          <button
-            type="button"
-            onClick={scrollToOrder}
-            className="
-              cta-shine
-              group
-              relative
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-3
-              overflow-hidden
-              rounded-full
-              border
-              border-red-300/20
-              bg-[#7f0d16]
-              px-7
-              py-4
-              text-sm
-              font-black
-              text-white
-              shadow-[0_15px_50px_rgba(127,13,22,0.45)]
-              transition-all
-              duration-300
-              hover:-translate-y-1
-              hover:bg-[#98131d]
-              hover:shadow-[0_20px_60px_rgba(127,13,22,0.55)]
-              active:scale-[0.98]
-            "
-          >
-            <span
-              className="
-                absolute
-                inset-0
-                bg-gradient-to-r
-                from-transparent
-                via-white/25
-                to-transparent
-                opacity-0
-                transition-opacity
-                duration-300
-                group-hover:opacity-100
-              "
-            />
-
-            <ShoppingBag
-              size={18}
-              className="relative z-10 transition-transform duration-300 group-hover:scale-110"
-            />
-
-            <span className="relative z-10">
-              {t.store.orderNow}
-            </span>
-
-            <span
-              className="
-                relative
-                z-10
-                rounded-full
-                bg-white/10
-                px-3
-                py-1
-                text-[11px]
-                font-black
-              "
-            >
-              {formatPrice(total)} DA
-            </span>
-          </button>
-        </div>
-      )}
-
-      <style jsx>{`
-        .cta-shine::after {
-          content: "";
-          position: absolute;
-          top: -60%;
-          left: -35%;
-          width: 28%;
-          height: 220%;
-          transform: rotate(18deg);
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), transparent);
-          animation: cta-shimmer 2.8s ease-in-out infinite;
-          pointer-events: none;
-        }
-
-        @keyframes cta-shimmer {
-          0%, 35% {
-            left: -35%;
-          }
-          70%, 100% {
-            left: 125%;
-          }
-        }
-      `}</style>
-
       <footer
         className="
           border-t
@@ -2763,6 +2729,56 @@ export default function HomePage() {
           </p>
         </div>
       </footer>
+
+      {/* ===================================================
+          STICKY CTA ANIMATION
+      =================================================== */}
+
+      <style jsx global>{`
+        @keyframes stickyShine {
+          0% {
+            transform: translateX(-180%) rotate(12deg);
+          }
+
+          45% {
+            transform: translateX(420%) rotate(12deg);
+          }
+
+          100% {
+            transform: translateX(420%) rotate(12deg);
+          }
+        }
+
+        .sticky-shine {
+          animation: stickyShine 3.2s ease-in-out infinite;
+        }
+
+        @keyframes stickyPulse {
+          0%,
+          100% {
+            box-shadow:
+              0 15px 50px rgba(127, 29, 29, 0.45),
+              0 0 0 0 rgba(153, 27, 27, 0.15);
+          }
+
+          50% {
+            box-shadow:
+              0 18px 55px rgba(127, 29, 29, 0.6),
+              0 0 0 7px rgba(153, 27, 27, 0.05);
+          }
+        }
+
+        .sticky-order-button {
+          animation: stickyPulse 2.8s ease-in-out infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .sticky-shine,
+          .sticky-order-button {
+            animation: none;
+          }
+        }
+      `}</style>
     </main>
   );
 }
@@ -2897,7 +2913,7 @@ function PerformanceCard({
 }
 
 /* =========================================================
-   LIGHT DELIVERY OPTION
+   DELIVERY OPTION
 ========================================================= */
 
 function LightDeliveryOption({
@@ -3000,7 +3016,7 @@ function LightDeliveryOption({
 }
 
 /* =========================================================
-   LIGHT INPUT
+   INPUT
 ========================================================= */
 
 function LightInputField({
@@ -3029,7 +3045,9 @@ function LightInputField({
           {icon}
         </span>
 
-        <span>{label}</span>
+        <span>
+          {label}
+        </span>
 
         <span className="text-orange-500">
           *
