@@ -1,7 +1,7 @@
 "use client";
-
 import {
   FormEvent,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -95,7 +95,32 @@ export default function HomePage() {
   const direction = isArabic
     ? "rtl"
     : "ltr";
+   
+  /* =====================================================
+   FLOATING ORDER BUTTON
+===================================================== */
 
+useEffect(() => {
+  const heroOrderButton =
+    document.getElementById("hero-order-button");
+
+  if (!heroOrderButton) return;
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      setShowFloatingOrder(!entry.isIntersecting);
+    },
+    {
+      threshold: 0.1,
+    }
+  );
+
+  observer.observe(heroOrderButton);
+
+  return () => {
+    observer.disconnect();
+  };
+}, []);  
   /* =====================================================
      CUSTOMER
   ===================================================== */
@@ -131,6 +156,8 @@ export default function HomePage() {
   const [orderConfirmed, setOrderConfirmed] =
     useState(false);
 
+  const [showFloatingOrder, setShowFloatingOrder] =
+   useState(false);
   /* =====================================================
      LOCATION
   ===================================================== */
@@ -708,6 +735,106 @@ export default function HomePage() {
         </div>
       </header>
 
+{/* ===================================================
+    FLOATING ORDER CTA
+=================================================== */}
+
+{showFloatingOrder && !orderConfirmed && (
+  <button
+    type="button"
+    onClick={() =>
+      document
+        .getElementById("order-section")
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
+    }
+    className="
+      fixed
+      bottom-5
+      left-1/2
+      z-[100]
+      w-[calc(100%-2rem)]
+      max-w-md
+      -translate-x-1/2
+      overflow-hidden
+      rounded-2xl
+      border
+      border-red-400/30
+      bg-[#7f0000]
+      px-6
+      py-4
+      text-white
+      shadow-[0_15px_50px_rgba(100,0,0,0.45)]
+      transition-all
+      duration-300
+      hover:-translate-y-1
+      hover:bg-[#980000]
+      hover:shadow-[0_20px_60px_rgba(120,0,0,0.55)]
+      active:scale-[0.98]
+      sm:bottom-7
+      sm:max-w-sm
+    "
+  >
+    {/* SHINE */}
+    <span
+      className="
+        pointer-events-none
+        absolute
+        inset-y-0
+        -left-[120%]
+        w-[70%]
+        rotate-[20deg]
+        bg-gradient-to-r
+        from-transparent
+        via-white/25
+        to-transparent
+        animate-[ctaShine_2.8s_ease-in-out_infinite]
+      "
+    />
+
+    {/* CONTENT */}
+
+    <span
+      className="
+        relative
+        flex
+        items-center
+        justify-center
+        gap-3
+      "
+    >
+      <ShoppingBag
+        size={19}
+        strokeWidth={2.5}
+      />
+
+      <span
+        className="
+          text-sm
+          font-black
+          tracking-wide
+        "
+      >
+        {t.store.orderNow}
+      </span>
+
+      <span
+        className="
+          rounded-lg
+          bg-white/15
+          px-2
+          py-1
+          text-xs
+          font-bold
+        "
+      >
+        {formatPrice(total)} DA
+      </span>
+    </span>
+  </button>
+)}
       {/* ===================================================
           HERO
       =================================================== */}
@@ -881,6 +1008,7 @@ export default function HomePage() {
               "
             >
               <button
+               id="hero-order-button"
                 type="button"
                 onClick={() =>
                   document
@@ -2927,4 +3055,16 @@ const lightInputClass = `
   focus:bg-white
   focus:ring-4
   focus:ring-orange-500/10
+`;
+const floatingCtaAnimation = `
+  @keyframes ctaShine {
+    0% {
+      transform: translateX(-120%) rotate(20deg);
+    }
+
+    45%,
+    100% {
+      transform: translateX(260%) rotate(20deg);
+    }
+  }
 `;

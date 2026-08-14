@@ -101,7 +101,16 @@ html {
     #333333 100%
   );
 }
+@keyframes ctaShine {
+  0% {
+    transform: translateX(-120%) rotate(20deg);
+  }
 
+  45%,
+  100% {
+    transform: translateX(260%) rotate(20deg);
+  }
+}
 /* Firefox */
 * {
   scrollbar-width: thin;
