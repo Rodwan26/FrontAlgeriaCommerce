@@ -15,7 +15,8 @@ export default function Header({
   onMenuClick,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b bg-white/95 px-4 backdrop-blur-sm sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b bg-white/95 px-4 
+backdrop-blur-sm sm:px-6 lg:px-8">
       {/* Left */}
       <div className="flex min-w-0 items-center gap-3">
         <button

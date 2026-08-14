@@ -1,24 +1,33 @@
-import Header from "../../components/landing/Header";
-import Hero from "../../components/landing/Hero/Hero";
-import Features from "../../components/landing/Features/Features";
-import OrderForm from "../../components/landing/Order/OrderForm";
-import Footer from "../../components/landing/Footer";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-[#080a0b]"
-    >
-      <Header />
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <Hero />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Header
+          onMenuClick={() => setSidebarOpen(true)}
+        />
 
-      <Features />
-
-      <OrderForm />
-
-      <Footer />
-    </main>
+        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
