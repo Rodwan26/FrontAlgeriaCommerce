@@ -1,55 +1,62 @@
 "use client";
 
-import { ShoppingCart } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Search,
+  UserCircle2,
+} from "lucide-react";
 
-export default function Header() {
-  const scrollToOrder = () => {
-    document
-      .getElementById("order")
-      ?.scrollIntoView({ behavior: "smooth" });
-  };
+type HeaderProps = {
+  onMenuClick: () => void;
+};
 
+export default function Header({
+  onMenuClick,
+}: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-[#080a0b]/90 backdrop-blur-xl">
-      <div className="mx-auto flex h-[70px] max-w-6xl items-center justify-between px-4">
-
-        {/* Logo */}
-        <div className="text-2xl font-black tracking-tight text-white">
-          H<span className="text-red-500">O</span>KA
-        </div>
-
-        {/* Navigation */}
-        <nav className="hidden items-center gap-8 text-sm text-gray-300 md:flex">
-          <a
-            href="#features"
-            className="transition hover:text-red-500"
-          >
-            المميزات
-          </a>
-
-          <a
-            href="#why-hoka"
-            className="transition hover:text-red-500"
-          >
-            لماذا HOKA؟
-          </a>
-
-          <a
-            href="#reviews"
-            className="transition hover:text-red-500"
-          >
-            تقييمات العملاء
-          </a>
-        </nav>
-
-        {/* CTA */}
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b bg-white/95 px-4 backdrop-blur-sm sm:px-6 lg:px-8">
+      {/* Left */}
+      <div className="flex min-w-0 items-center gap-3">
         <button
-          onClick={scrollToOrder}
-          className="flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-500 active:scale-95"
+          type="button"
+          onClick={onMenuClick}
+          className="rounded-xl p-2 text-gray-600 transition hover:bg-gray-100 lg:hidden"
+          aria-label="Open menu"
         >
-          <ShoppingCart size={17} />
-          اطلب الآن
+          <Menu size={22} />
         </button>
+
+        <div className="min-w-0">
+          <h1 className="truncate text-lg font-semibold text-gray-800 sm:text-xl">
+            Dashboard
+          </h1>
+
+          <p className="hidden text-xs text-gray-500 sm:block">
+            Manage your store
+          </p>
+        </div>
+      </div>
+
+      {/* Right */}
+      <div className="flex shrink-0 items-center gap-1 sm:gap-3">
+        <button
+          type="button"
+          className="hidden rounded-xl p-2 text-gray-500 transition hover:bg-gray-100 sm:block"
+          aria-label="Search"
+        >
+          <Search className="h-5 w-5" />
+        </button>
+
+        <button
+          type="button"
+          className="rounded-xl p-2 text-gray-500 transition hover:bg-gray-100"
+          aria-label="Notifications"
+        >
+          <Bell className="h-5 w-5" />
+        </button>
+
+        <UserCircle2 className="h-8 w-8 text-indigo-600" />
       </div>
     </header>
   );
