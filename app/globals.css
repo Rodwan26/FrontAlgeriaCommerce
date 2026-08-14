@@ -200,3 +200,16 @@ html {
   }
 }
 
+@keyframes ctaShine {
+  0% {
+    left: -80%;
+  }
+
+  45% {
+    left: 130%;
+  }
+
+  100% {
+    left: 130%;
+  }
+}

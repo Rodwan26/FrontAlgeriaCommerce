@@ -778,21 +778,22 @@ useEffect(() => {
     "
   >
     {/* SHINE */}
-    <span
-      className="
-        pointer-events-none
-        absolute
-        inset-y-0
-        -left-[120%]
-        w-[70%]
-        rotate-[20deg]
-        bg-gradient-to-r
-        from-transparent
-        via-white/25
-        to-transparent
-        animate-[ctaShine_2.8s_ease-in-out_infinite]
-      "
-    />
+   <span
+  className="
+    pointer-events-none
+    absolute
+    inset-y-0
+    -left-[80%]
+    w-[45%]
+    rotate-[20deg]
+    bg-gradient-to-r
+    from-transparent
+    via-white/15
+    to-transparent
+    blur-[2px]
+    animate-[ctaShine_3.2s_ease-in-out_infinite]
+  "
+/>
 
     {/* CONTENT */}
 
