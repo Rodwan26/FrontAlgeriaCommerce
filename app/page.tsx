@@ -1,4 +1,4 @@
-import Header from "../components/landing/header";
+import Header from "../components/landing/Header";
 import Hero from "../components/landing/Hero/Hero";
 import Features from "../components/landing/Features/Features";
 import OrderForm from "../components/landing/Order/OrderForm";
