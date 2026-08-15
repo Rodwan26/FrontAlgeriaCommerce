@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 import { product } from "../../data/product";
