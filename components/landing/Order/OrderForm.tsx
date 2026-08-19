@@ -2,18 +2,15 @@
 
 import { useState } from "react";
 import {
-  MapPin,
-  Phone,
   User,
-  ShoppingBag,
+  Phone,
+  MapPin,
   Home,
-  Building2,
-  Minus,
   Plus,
-  Check,
+  Minus,
 } from "lucide-react";
 
-import { product } from "../../data/product";
+import { product } from "./../../data/product";
 
 type DeliveryMethod = "home" | "office";
 
@@ -24,6 +21,7 @@ const deliveryPrices: Record<DeliveryMethod, number> = {
 
 export default function OrderForm() {
   const [quantity, setQuantity] = useState(1);
+
   const [deliveryMethod, setDeliveryMethod] =
     useState<DeliveryMethod>("home");
 
@@ -35,7 +33,9 @@ export default function OrderForm() {
   const [loading, setLoading] = useState(false);
 
   const deliveryPrice = deliveryPrices[deliveryMethod];
+
   const productsTotal = product.price * quantity;
+
   const totalPrice = productsTotal + deliveryPrice;
 
   const formatPrice = (price: number) =>
@@ -43,7 +43,7 @@ export default function OrderForm() {
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      alert("يرجى إدخال الاسم الكامل");
+      alert("يرجى إدخال الاسم");
       return;
     }
 
@@ -65,11 +65,6 @@ export default function OrderForm() {
     setLoading(true);
 
     try {
-      /*
-       * سيتم ربط الطلب بالـ Backend لاحقًا
-       * بعد موافقة العميل على التصميم.
-       */
-
       await new Promise((resolve) =>
         setTimeout(resolve, 700)
       );
@@ -101,364 +96,547 @@ export default function OrderForm() {
       dir="rtl"
       className="
         relative
+        min-h-screen
         overflow-hidden
-        bg-[#080a0b]
+        bg-[#151515]
         px-4
-        py-10
-        sm:py-12
-        md:py-14
+        pb-28
+        pt-10
+        sm:px-6
       "
     >
-      {/* Ambient glow */}
+      {/* =========================================
+          BACKGROUND
+      ========================================= */}
+
       <div
         className="
           pointer-events-none
           absolute
-          left-1/2
-          top-1/2
-          h-[360px]
-          w-[360px]
-          -translate-x-1/2
-          -translate-y-1/2
-          rounded-full
-          bg-red-600/[0.06]
-          blur-[120px]
+          inset-0
+          bg-[radial-gradient(circle_at_50%_15%,rgba(72,20,180,0.10),transparent_45%)]
         "
       />
 
-      <div className="relative mx-auto max-w-xl">
+      {/* =========================================
+          MAIN CONTAINER
+      ========================================= */}
 
-        {/* =========================
+      <div
+        className="
+          relative
+          mx-auto
+          w-full
+          max-w-[520px]
+          border-x-2
+          border-[#4018b8]
+          px-5
+          pb-8
+          pt-2
+          sm:px-8
+        "
+      >
+
+        {/* =========================================
             HEADER
-        ========================== */}
+        ========================================= */}
 
-        <div className="text-center">
+        <div className="mb-7 text-center">
 
-          <p className="text-xs font-bold tracking-[0.18em] text-red-500">
-            اطلب الآن
-          </p>
-
-          <h2
+          <p
             className="
-              mt-2
-              text-3xl
-              font-black
-              tracking-tight
+              text-sm
+              font-bold
               text-white
-              sm:text-4xl
+              sm:text-base
             "
           >
-            أكمل طلبك
-          </h2>
-
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
-            أدخل معلوماتك وسنتواصل معك لتأكيد الطلب.
+            احصل على منتجك الآن
           </p>
-
-        </div>
-
-        {/* =========================
-            FORM CARD
-        ========================== */}
-
-        <div
-          className="
-            mt-6
-            rounded-3xl
-            border
-            border-white/[0.08]
-            bg-[#111315]/90
-            p-4
-            shadow-2xl
-            backdrop-blur-xl
-            sm:p-6
-          "
-        >
-
-          {/* =========================
-              CUSTOMER INFORMATION
-          ========================== */}
-
-          <div className="space-y-3">
-
-            {/* Name */}
-
-            <div className="relative">
-
-              <User
-                size={18}
-                className="
-                  pointer-events-none
-                  absolute
-                  right-4
-                  top-1/2
-                  z-10
-                  -translate-y-1/2
-                  text-gray-500
-                "
-              />
-
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="الاسم الكامل"
-                autoComplete="name"
-                className="
-                  h-14
-                  w-full
-                  rounded-xl
-                  border
-                  border-white/[0.08]
-                  bg-white/[0.035]
-                  pr-12
-                  pl-4
-                  text-right
-                  text-sm
-                  text-white
-                  outline-none
-                  placeholder:text-gray-500
-                  transition-all
-                  duration-200
-                  focus:border-red-500/60
-                  focus:bg-white/[0.05]
-                  focus:ring-2
-                  focus:ring-red-500/[0.08]
-                "
-              />
-
-            </div>
-
-            {/* Phone */}
-
-            <div className="relative">
-
-              <Phone
-                size={18}
-                className="
-                  pointer-events-none
-                  absolute
-                  right-4
-                  top-1/2
-                  z-10
-                  -translate-y-1/2
-                  text-gray-500
-                "
-              />
-
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="رقم الهاتف"
-                dir="ltr"
-                inputMode="tel"
-                autoComplete="tel"
-                className="
-                  h-14
-                  w-full
-                  rounded-xl
-                  border
-                  border-white/[0.08]
-                  bg-white/[0.035]
-                  pr-12
-                  pl-4
-                  text-left
-                  text-sm
-                  text-white
-                  outline-none
-                  placeholder:text-gray-500
-                  transition-all
-                  duration-200
-                  focus:border-red-500/60
-                  focus:bg-white/[0.05]
-                  focus:ring-2
-                  focus:ring-red-500/[0.08]
-                "
-              />
-
-            </div>
-
-            {/* Location */}
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-              {/* Wilaya */}
-
-              <div className="relative">
-
-                <MapPin
-                  size={18}
-                  className="
-                    pointer-events-none
-                    absolute
-                    right-4
-                    top-1/2
-                    z-10
-                    -translate-y-1/2
-                    text-gray-500
-                  "
-                />
-
-                <select
-                  value={wilaya}
-                  onChange={(e) => setWilaya(e.target.value)}
-                  className={`
-                    h-14
-                    w-full
-                    appearance-none
-                    rounded-xl
-                    border
-                    border-white/[0.08]
-                    bg-[#151719]
-                    pr-12
-                    pl-4
-                    text-right
-                    text-sm
-                    outline-none
-                    transition-all
-                    duration-200
-                    focus:border-red-500/60
-                    focus:ring-2
-                    focus:ring-red-500/[0.08]
-                    ${
-                      wilaya
-                        ? "text-white"
-                        : "text-gray-500"
-                    }
-                  `}
-                >
-                  <option value="" disabled>
-                    اختر الولاية
-                  </option>
-
-                  <option value="الجزائر">
-                    الجزائر
-                  </option>
-
-                  <option value="وهران">
-                    وهران
-                  </option>
-
-                  <option value="تلمسان">
-                    تلمسان
-                  </option>
-
-                  <option value="سطيف">
-                    سطيف
-                  </option>
-
-                  <option value="قسنطينة">
-                    قسنطينة
-                  </option>
-                </select>
-
-              </div>
-
-              {/* Commune */}
-
-              <div className="relative">
-
-                <MapPin
-                  size={18}
-                  className="
-                    pointer-events-none
-                    absolute
-                    right-4
-                    top-1/2
-                    z-10
-                    -translate-y-1/2
-                    text-gray-500
-                  "
-                />
-
-                <select
-                  value={commune}
-                  onChange={(e) => setCommune(e.target.value)}
-                  disabled={!wilaya}
-                  className={`
-                    h-14
-                    w-full
-                    appearance-none
-                    rounded-xl
-                    border
-                    border-white/[0.08]
-                    bg-[#151719]
-                    pr-12
-                    pl-4
-                    text-right
-                    text-sm
-                    outline-none
-                    transition-all
-                    duration-200
-                    focus:border-red-500/60
-                    focus:ring-2
-                    focus:ring-red-500/[0.08]
-                    disabled:cursor-not-allowed
-                    disabled:opacity-50
-                    ${
-                      commune
-                        ? "text-white"
-                        : "text-gray-500"
-                    }
-                  `}
-                >
-                  <option value="" disabled>
-                    اختر البلدية
-                  </option>
-
-                  <option value="بلدية 1">
-                    بلدية 1
-                  </option>
-
-                  <option value="بلدية 2">
-                    بلدية 2
-                  </option>
-
-                  <option value="بلدية 3">
-                    بلدية 3
-                  </option>
-                </select>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* =========================
-              QUANTITY
-          ========================== */}
 
           <div
             className="
               mt-3
               flex
-              h-14
               items-center
-              justify-between
-              rounded-xl
-              border
-              border-white/[0.08]
-              bg-white/[0.035]
-              px-4
+              justify-center
+              gap-2
             "
           >
 
-            <div className="flex items-center gap-3">
+            <span
+              className="
+                text-4xl
+                font-black
+                tracking-tight
+                text-white
+                sm:text-5xl
+              "
+            >
+              {formatPrice(product.price)}
+            </span>
 
-              <ShoppingBag
-                size={18}
-                className="text-gray-500"
-              />
+            <span
+              className="
+                text-lg
+                font-bold
+                text-white
+              "
+            >
+              دج
+            </span>
 
-              <span className="text-sm text-gray-400">
-                الكمية
-              </span>
+          </div>
+
+        </div>
+
+        {/* =========================================
+            FORM
+        ========================================= */}
+
+        <div className="space-y-5">
+
+          {/* =======================================
+              NAME
+          ======================================= */}
+
+          <div
+            className="
+              flex
+              h-[62px]
+              w-full
+              overflow-hidden
+              rounded-2xl
+              border-2
+              border-[#4018b8]
+              bg-[#181818]
+            "
+          >
+
+            {/* Input */}
+
+            <input
+              type="text"
+              value={name}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
+              placeholder="الاسم"
+              className="
+                min-w-0
+                flex-1
+                bg-transparent
+                px-5
+                text-right
+                text-lg
+                font-bold
+                text-white
+                outline-none
+                placeholder:text-[#999]
+                placeholder:font-bold
+              "
+            />
+
+            {/* Icon */}
+
+            <div
+              className="
+                flex
+                w-[76px]
+                shrink-0
+                items-center
+                justify-center
+                border-r-2
+                border-[#4018b8]
+                bg-[#191919]
+                text-[#a7a7a7]
+              "
+            >
+              <User size={27} strokeWidth={1.8} />
+            </div>
+
+          </div>
+
+          {/* =======================================
+              PHONE
+          ======================================= */}
+
+          <div
+            className="
+              flex
+              h-[62px]
+              w-full
+              overflow-hidden
+              rounded-2xl
+              border-2
+              border-[#4018b8]
+              bg-[#181818]
+            "
+          >
+
+            {/* Input */}
+
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) =>
+                setPhone(e.target.value)
+              }
+              placeholder="رقم الهاتف"
+              dir="ltr"
+              inputMode="tel"
+              className="
+                min-w-0
+                flex-1
+                bg-transparent
+                px-5
+                text-left
+                text-lg
+                font-bold
+                tracking-wide
+                text-white
+                outline-none
+                placeholder:text-[#999]
+                placeholder:font-bold
+                placeholder:text-right
+              "
+            />
+
+            {/* Icon */}
+
+            <div
+              className="
+                flex
+                w-[76px]
+                shrink-0
+                items-center
+                justify-center
+                border-r-2
+                border-[#4018b8]
+                bg-[#191919]
+                text-[#a7a7a7]
+              "
+            >
+              <Phone size={27} strokeWidth={1.8} />
+            </div>
+
+          </div>
+
+          {/* =======================================
+              WILAYA
+          ======================================= */}
+
+          <div
+            className="
+              relative
+              h-[62px]
+              w-full
+              overflow-hidden
+              rounded-2xl
+              border-2
+              border-[#4018b8]
+              bg-[#181818]
+            "
+          >
+
+            <MapPin
+              size={23}
+              strokeWidth={1.8}
+              className="
+                pointer-events-none
+                absolute
+                right-5
+                top-1/2
+                z-10
+                -translate-y-1/2
+                text-[#999]
+              "
+            />
+
+            <select
+              value={wilaya}
+              onChange={(e) =>
+                setWilaya(e.target.value)
+              }
+              className={`
+                h-full
+                w-full
+                appearance-none
+                bg-transparent
+                px-5
+                pr-14
+                text-right
+                text-lg
+                font-bold
+                outline-none
+                ${
+                  wilaya
+                    ? "text-white"
+                    : "text-[#999]"
+                }
+              `}
+            >
+
+              <option
+                value=""
+                disabled
+                className="bg-[#181818]"
+              >
+                اختر الولاية
+              </option>
+
+              <option value="الجزائر">
+                الجزائر
+              </option>
+
+              <option value="وهران">
+                وهران
+              </option>
+
+              <option value="تلمسان">
+                تلمسان
+              </option>
+
+              <option value="سطيف">
+                سطيف
+              </option>
+
+              <option value="قسنطينة">
+                قسنطينة
+              </option>
+
+            </select>
+
+          </div>
+
+          {/* =======================================
+              COMMUNE
+          ======================================= */}
+
+          <div
+            className="
+              relative
+              h-[62px]
+              w-full
+              overflow-hidden
+              rounded-2xl
+              border-2
+              border-[#4018b8]
+              bg-[#181818]
+            "
+          >
+
+            <MapPin
+              size={23}
+              strokeWidth={1.8}
+              className="
+                pointer-events-none
+                absolute
+                right-5
+                top-1/2
+                z-10
+                -translate-y-1/2
+                text-[#999]
+              "
+            />
+
+            <select
+              value={commune}
+              onChange={(e) =>
+                setCommune(e.target.value)
+              }
+              className={`
+                h-full
+                w-full
+                appearance-none
+                bg-transparent
+                px-5
+                pr-14
+                text-right
+                text-lg
+                font-bold
+                outline-none
+                ${
+                  commune
+                    ? "text-white"
+                    : "text-[#999]"
+                }
+              `}
+            >
+
+              <option
+                value=""
+                disabled
+                className="bg-[#181818]"
+              >
+                اختر البلدية
+              </option>
+
+              <option value="بلدية 1">
+                بلدية 1
+              </option>
+
+              <option value="بلدية 2">
+                بلدية 2
+              </option>
+
+              <option value="بلدية 3">
+                بلدية 3
+              </option>
+
+            </select>
+
+          </div>
+
+          {/* =======================================
+              DELIVERY
+          ======================================= */}
+
+          <button
+            type="button"
+            onClick={() =>
+              setDeliveryMethod(
+                deliveryMethod === "home"
+                  ? "office"
+                  : "home"
+              )
+            }
+            className="
+              flex
+              h-[62px]
+              w-full
+              items-center
+              justify-between
+              rounded-2xl
+              border-2
+              border-[#4018b8]
+              bg-[#181818]
+              px-5
+              text-right
+              transition
+              active:scale-[0.99]
+            "
+          >
+
+            <div className="flex items-center gap-4">
+
+              <div
+                className={`
+                  flex
+                  h-10
+                  w-10
+                  items-center
+                  justify-center
+                  rounded-xl
+                  transition-all
+                  ${
+                    deliveryMethod === "home"
+                      ? "bg-[#4018b8] text-white"
+                      : "bg-[#292929] text-[#999]"
+                  }
+                `}
+              >
+                {deliveryMethod === "home" ? (
+                  <Home size={21} />
+                ) : (
+                  <MapPin size={21} />
+                )}
+              </div>
+
+              <div className="text-right">
+
+                <p className="text-lg font-black text-white">
+                  {deliveryMethod === "home"
+                    ? "توصيل إلى المنزل"
+                    : "توصيل إلى المكتب"}
+                </p>
+
+                <p className="mt-0.5 text-sm font-bold text-[#888]">
+                  {formatPrice(deliveryPrice)} دج
+                </p>
+
+              </div>
 
             </div>
 
-            <div className="flex items-center gap-4">
+            <div
+              className="
+                flex
+                h-7
+                w-7
+                items-center
+                justify-center
+                rounded-full
+                border-2
+                border-[#4018b8]
+              "
+            >
+
+              <div
+                className={`
+                  h-3
+                  w-3
+                  rounded-full
+                  bg-[#4018b8]
+                  transition
+                  ${
+                    deliveryMethod === "home"
+                      ? "opacity-100"
+                      : "opacity-0"
+                  }
+                `}
+              />
+
+            </div>
+
+          </button>
+
+          {/* =======================================
+              QUANTITY
+          ======================================= */}
+
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              pt-2
+            "
+          >
+
+            {/* Label */}
+
+            <div>
+
+              <p
+                className="
+                  text-lg
+                  font-black
+                  text-white
+                  sm:text-xl
+                "
+              >
+                الكمية
+              </p>
+
+            </div>
+
+            {/* Counter */}
+
+            <div
+              className="
+                flex
+                h-[62px]
+                w-[205px]
+                items-center
+                justify-between
+                rounded-2xl
+                border-2
+                border-[#4018b8]
+                bg-[#181818]
+                px-4
+              "
+            >
 
               <button
                 type="button"
@@ -469,24 +647,27 @@ export default function OrderForm() {
                 }
                 className="
                   flex
-                  h-8
-                  w-8
+                  h-10
+                  w-10
                   items-center
                   justify-center
-                  rounded-lg
-                  bg-white/[0.05]
-                  text-white
+                  text-[#aaa]
                   transition
-                  hover:bg-white/[0.1]
+                  hover:text-white
                   active:scale-90
                 "
-                aria-label="تقليل الكمية"
               >
-                <Minus size={15} />
+                <Minus size={28} />
               </button>
 
-              <span className="w-5 text-center text-sm font-bold text-white">
-                {quantity}
+              <span
+                className="
+                  text-xl
+                  font-black
+                  text-white
+                "
+              >
+                {String(quantity).padStart(2, "0")}
               </span>
 
               <button
@@ -496,350 +677,55 @@ export default function OrderForm() {
                 }
                 className="
                   flex
-                  h-8
-                  w-8
+                  h-10
+                  w-10
                   items-center
                   justify-center
-                  rounded-lg
-                  bg-white/[0.05]
-                  text-white
+                  text-[#aaa]
                   transition
-                  hover:bg-white/[0.1]
+                  hover:text-white
                   active:scale-90
                 "
-                aria-label="زيادة الكمية"
               >
-                <Plus size={15} />
+                <Plus size={28} />
               </button>
 
             </div>
 
           </div>
 
-          {/* =========================
-              DELIVERY METHOD
-          ========================== */}
-
-          <div className="mt-5">
-
-            <div className="mb-3 flex items-center justify-between">
-
-              <span className="text-sm font-bold text-white">
-                طريقة التوصيل
-              </span>
-
-              <span className="text-xs text-gray-500">
-                اختر الطريقة المناسبة لك
-              </span>
-
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-              {/* HOME DELIVERY */}
-
-              <button
-                type="button"
-                onClick={() =>
-                  setDeliveryMethod("home")
-                }
-                aria-pressed={deliveryMethod === "home"}
-                className={`
-                  relative
-                  flex
-                  min-h-[82px]
-                  items-center
-                  justify-between
-                  gap-3
-                  rounded-2xl
-                  border
-                  p-4
-                  text-right
-                  transition-all
-                  duration-200
-                  ${
-                    deliveryMethod === "home"
-                      ? `
-                        border-red-500/70
-                        bg-red-500/[0.08]
-                        shadow-lg
-                        shadow-red-500/[0.05]
-                      `
-                      : `
-                        border-white/[0.08]
-                        bg-white/[0.025]
-                        hover:border-white/[0.15]
-                        hover:bg-white/[0.04]
-                      `
-                  }
-                `}
-              >
-
-                {/* Content */}
-
-                <div className="flex min-w-0 items-center gap-3">
-
-                  <div
-                    className={`
-                      flex
-                      h-10
-                      w-10
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      transition-colors
-                      ${
-                        deliveryMethod === "home"
-                          ? "bg-red-500/15 text-red-500"
-                          : "bg-white/[0.05] text-gray-500"
-                      }
-                    `}
-                  >
-                    <Home size={19} />
-                  </div>
-
-                  <div className="min-w-0">
-
-                    <p className="text-sm font-bold text-white">
-                      التوصيل للمنزل
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-500">
-                      استلام الطلب في المنزل
-                    </p>
-
-                  </div>
-
-                </div>
-
-                {/* Price */}
-
-                <div className="shrink-0 text-left">
-
-                  <p className="whitespace-nowrap text-sm font-black text-white">
-                    {formatPrice(deliveryPrices.home)}
-                  </p>
-
-                  <p className="mt-0.5 text-[10px] text-gray-500">
-                    دج
-                  </p>
-
-                </div>
-
-                {/* Selected indicator */}
-
-                {deliveryMethod === "home" && (
-                  <div
-                    className="
-                      absolute
-                      left-2
-                      top-2
-                      flex
-                      h-5
-                      w-5
-                      items-center
-                      justify-center
-                      rounded-full
-                      bg-red-500
-                      text-white
-                      shadow-md
-                      shadow-red-500/20
-                    "
-                  >
-                    <Check
-                      size={11}
-                      strokeWidth={3.5}
-                    />
-                  </div>
-                )}
-
-              </button>
-
-              {/* OFFICE DELIVERY */}
-
-              <button
-                type="button"
-                onClick={() =>
-                  setDeliveryMethod("office")
-                }
-                aria-pressed={deliveryMethod === "office"}
-                className={`
-                  relative
-                  flex
-                  min-h-[82px]
-                  items-center
-                  justify-between
-                  gap-3
-                  rounded-2xl
-                  border
-                  p-4
-                  text-right
-                  transition-all
-                  duration-200
-                  ${
-                    deliveryMethod === "office"
-                      ? `
-                        border-red-500/70
-                        bg-red-500/[0.08]
-                        shadow-lg
-                        shadow-red-500/[0.05]
-                      `
-                      : `
-                        border-white/[0.08]
-                        bg-white/[0.025]
-                        hover:border-white/[0.15]
-                        hover:bg-white/[0.04]
-                      `
-                  }
-                `}
-              >
-
-                {/* Content */}
-
-                <div className="flex min-w-0 items-center gap-3">
-
-                  <div
-                    className={`
-                      flex
-                      h-10
-                      w-10
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      transition-colors
-                      ${
-                        deliveryMethod === "office"
-                          ? "bg-red-500/15 text-red-500"
-                          : "bg-white/[0.05] text-gray-500"
-                      }
-                    `}
-                  >
-                    <Building2 size={19} />
-                  </div>
-
-                  <div className="min-w-0">
-
-                    <p className="text-sm font-bold text-white">
-                      التوصيل للمكتب
-                    </p>
-
-                    <p className="mt-1 text-xs text-gray-500">
-                      الاستلام من مكتب التوصيل
-                    </p>
-
-                  </div>
-
-                </div>
-
-                {/* Price */}
-
-                <div className="shrink-0 text-left">
-
-                  <p className="whitespace-nowrap text-sm font-black text-white">
-                    {formatPrice(deliveryPrices.office)}
-                  </p>
-
-                  <p className="mt-0.5 text-[10px] text-gray-500">
-                    دج
-                  </p>
-
-                </div>
-
-                {/* Selected indicator */}
-
-                {deliveryMethod === "office" && (
-                  <div
-                    className="
-                      absolute
-                      left-2
-                      top-2
-                      flex
-                      h-5
-                      w-5
-                      items-center
-                      justify-center
-                      rounded-full
-                      bg-red-500
-                      text-white
-                      shadow-md
-                      shadow-red-500/20
-                    "
-                  >
-                    <Check
-                      size={11}
-                      strokeWidth={3.5}
-                    />
-                  </div>
-                )}
-
-              </button>
-
-            </div>
-
-          </div>
-
-          {/* =========================
-              ORDER SUMMARY
-          ========================== */}
+          {/* =======================================
+              TOTAL
+          ======================================= */}
 
           <div
             className="
               mt-5
-              space-y-3
               border-t
-              border-white/[0.08]
+              border-[#30127e]
               pt-5
             "
           >
 
             <div className="flex items-center justify-between">
 
-              <span className="text-sm text-gray-500">
-                المنتجات
-              </span>
-
-              <span className="text-sm font-medium text-gray-300">
-                {formatPrice(productsTotal)} دج
-              </span>
-
-            </div>
-
-            <div className="flex items-center justify-between">
-
-              <span className="text-sm text-gray-500">
-                التوصيل
-              </span>
-
-              <span className="text-sm font-medium text-gray-300">
-                {formatPrice(deliveryPrice)} دج
-              </span>
-
-            </div>
-
-            <div
-              className="
-                flex
-                items-end
-                justify-between
-                border-t
-                border-white/[0.05]
-                pt-3
-              "
-            >
-
-              <span className="text-sm font-bold text-gray-300">
+              <span className="text-base font-bold text-[#999]">
                 المجموع
               </span>
 
               <div className="flex items-baseline gap-2">
 
-                <span className="text-2xl font-black text-white">
+                <span
+                  className="
+                    text-3xl
+                    font-black
+                    text-white
+                  "
+                >
                   {formatPrice(totalPrice)}
                 </span>
 
-                <span className="text-sm font-bold text-red-500">
+                <span className="text-base font-bold text-white">
                   دج
                 </span>
 
@@ -849,70 +735,61 @@ export default function OrderForm() {
 
           </div>
 
-          {/* =========================
-              SUBMIT
-          ========================== */}
-
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="
-              relative
-              mt-5
-              flex
-              h-14
-              w-full
-              items-center
-              justify-center
-              gap-2
-              overflow-hidden
-              rounded-xl
-              bg-red-600
-              text-base
-              font-black
-              text-white
-              shadow-xl
-              shadow-red-600/20
-              transition-all
-              duration-300
-              hover:bg-red-500
-              hover:shadow-red-600/30
-              active:scale-[0.98]
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-            "
-          >
-
-            {loading ? (
-              <>
-                <span
-                  className="
-                    h-4
-                    w-4
-                    animate-spin
-                    rounded-full
-                    border-2
-                    border-white/30
-                    border-t-white
-                  "
-                />
-
-                جاري إرسال الطلب...
-              </>
-            ) : (
-              "تأكيد الطلب"
-            )}
-
-          </button>
-
-          <p className="mt-3 text-center text-[11px] text-gray-600">
-            سنتواصل معك هاتفيًا لتأكيد طلبك قبل الشحن.
-          </p>
-
         </div>
 
       </div>
+
+      {/* =========================================
+          MOBILE STICKY CTA
+      ========================================= */}
+
+      <div
+        className="
+          fixed
+          bottom-0
+          left-0
+          right-0
+          z-50
+          border-t
+          border-[#222]
+          bg-[#111]
+          p-3
+          pb-[calc(0.75rem+env(safe-area-inset-bottom))]
+          md:hidden
+        "
+      >
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={loading}
+          className="
+            flex
+            h-[58px]
+            w-full
+            items-center
+            justify-center
+            rounded-2xl
+            bg-red-600
+            text-lg
+            font-black
+            text-white
+            shadow-[0_8px_30px_rgba(255,0,0,0.25)]
+            transition
+            hover:bg-red-500
+            active:scale-[0.98]
+            disabled:opacity-60
+          "
+        >
+
+          {loading
+            ? "جاري إرسال الطلب..."
+            : "اطلب الآن"}
+
+        </button>
+
+      </div>
+
     </section>
   );
 }
