@@ -42,20 +42,20 @@ export default function StickyOrderButton() {
           className="
             pointer-events-none
             absolute
-            inset-y-0
-            -left-1/2
-            w-1/3
-            rotate-12
+            top-[-60%]
+            h-[220%]
+            w-16
+            -skew-x-[20deg]
             bg-gradient-to-r
             from-transparent
-            via-white/40
+            via-white/45
             to-transparent
-            blur-sm
-            animate-[shine_2.8s_ease-in-out_infinite]
+            blur-[2px]
+            animate-cta-shine
           "
         />
 
-        {/* Content */}
+        {/* Button content */}
         <span className="relative z-10 flex items-center gap-2">
           <ShoppingCart size={19} />
 

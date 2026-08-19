@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
+/* ========================================
+   ROOT
+======================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #101112;
+  --foreground: #eeeeee;
 }
 
 @theme inline {
@@ -12,113 +16,118 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* ---------- Global Form Styles ---------- */
-
-input,
-textarea,
-select {
-  color: #111827;
-  background: #ffffff;
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #9ca3af;
-}
-
-label {
-  color: #111827;
-  font-weight: 600;
-}
-
-th {
-  color: #111827;
-  font-weight: 700;
-}
-
-td {
-  color: #374151;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #111827;
-}
 /* ========================================
-   Algeria Commerce - Custom Scrollbar
-   ======================================== */
+   BODY
+======================================== */
 
 html {
   scroll-behavior: smooth;
 }
 
-/* Chrome / Edge / Safari */
-::-webkit-scrollbar {
-  width: 10px;
+body {
+  margin: 0;
+  background: #101112;
+  color: #eeeeee;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-::-webkit-scrollbar-track {
-  background: #f8f8f6;
+/* ========================================
+   LANDING PAGE FORM
+======================================== */
+
+/*
+  مهم جدًا:
+  لا يوجد أي خلفية بيضاء للـ inputs/selects.
+*/
+
+#order input,
+#order textarea,
+#order select {
+  color: #d4d4d4 !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #292a2b 0%,
+      #202122 48%,
+      #191a1b 100%
+    ) !important;
+
+  border-color: rgba(255, 255, 255, 0.09) !important;
+
+  outline: none !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.025),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    180deg,
-    #111111 0%,
-    #333333 50%,
-    #111111 100%
-  );
+/* Placeholder */
 
-  border-radius: 999px;
-
-  border: 3px solid #f8f8f6;
-
-  transition: background 0.3s ease;
+#order input::placeholder,
+#order textarea::placeholder {
+  color: #858585 !important;
+  opacity: 1;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    #333333 0%,
-    #000000 50%,
-    #333333 100%
-  );
+/* Focus */
+
+#order input:focus,
+#order textarea:focus,
+#order select:focus {
+  border-color: rgba(239, 68, 68, 0.55) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2c2d2e 0%,
+      #232425 48%,
+      #1b1c1d 100%
+    ) !important;
+
+  box-shadow:
+    0 0 0 3px rgba(239, 68, 68, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
+
+/* Select options */
+
+#order select option {
+  background: #1d1e1f;
+  color: #d4d4d4;
+}
+
+/* Icons inside the order form */
+
+#order svg {
+  color: #a3a3a3;
+}
+
+/* ========================================
+   CTA SHINE
+======================================== */
+
 @keyframes ctaShine {
   0% {
-    transform: translateX(-120%) rotate(20deg);
+    left: -35%;
   }
 
-  45%,
+  45% {
+    left: 115%;
+  }
+
   100% {
-    transform: translateX(260%) rotate(20deg);
+    left: 115%;
   }
 }
-/* Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #222222 #f8f8f6;
+
+.animate-cta-shine {
+  animation: ctaShine 2.8s ease-in-out infinite;
 }
+
 /* ========================================
-   Algeria Commerce - Animations
-   ======================================== */
+   FADE UP
+======================================== */
 
 @keyframes fadeUp {
   from {
@@ -132,14 +141,14 @@ html {
   }
 }
 
-
 /* ========================================
-   Algeria Commerce - Premium 3D Cards
-   ======================================== */
+   PRODUCT CARDS
+======================================== */
 
 .product-card {
   transform-style: preserve-3d;
   will-change: transform;
+
   transition:
     transform 0.18s ease-out,
     box-shadow 0.4s ease;
@@ -154,14 +163,17 @@ html {
 .product-image {
   transform: translateZ(0) scale(1);
   transform-style: preserve-3d;
+
   transition:
     transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+
   will-change: transform;
 }
 
 .product-content {
   transform: translateZ(0);
   transform-style: preserve-3d;
+
   transition:
     transform 0.4s ease-out;
 }
@@ -169,25 +181,14 @@ html {
 .product-badge {
   transform: translateZ(0);
   transform-style: preserve-3d;
+
   transition:
     transform 0.4s ease-out;
 }
 
-/* Fade Up */
-
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* احترام المستخدمين الذين يعطلون الحركة */
+/* ========================================
+   REDUCED MOTION
+======================================== */
 
 @media (prefers-reduced-motion: reduce) {
   .product-card,
@@ -198,11 +199,113 @@ html {
     animation: none !important;
     transform: none !important;
   }
+
+  .animate-cta-shine {
+    animation: none !important;
+  }
 }
+
+/* ========================================
+   SCROLLBAR
+======================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #101112;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    #333333 0%,
+    #555555 50%,
+    #222222 100%
+  );
+
+  border-radius: 999px;
+  border: 3px solid #101112;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #555555 0%,
+    #777777 50%,
+    #333333 100%
+  );
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #333333 #101112;
+}
+
+/* ========================================
+   DEFAULT HEADINGS
+======================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: inherit;
+}
+@keyframes shine {
+  0% {
+    left: -50%;
+  }
+
+  45%,
+  100% {
+    left: 130%;
+  }
+}
+/* ========================================
+   HERO IMAGE ANIMATION
+======================================== */
+
+@keyframes heroImageIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+/* ========================================
+   HERO TEXT ANIMATION
+======================================== */
+
+@keyframes heroTextIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ========================================
+   CTA SHINE
+======================================== */
 
 @keyframes ctaShine {
   0% {
-    left: -80%;
+    left: -70%;
   }
 
   45% {

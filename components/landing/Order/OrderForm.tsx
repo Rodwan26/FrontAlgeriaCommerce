@@ -1,149 +1,273 @@
 "use client";
 
 import { useState } from "react";
-import {
-  User,
-  Phone,
-  Home,
-  ShoppingCart,
-} from "lucide-react";
-
-import FormField from "./FormField";
-import LocationSelect from "./LocationSelect";
-import QuantitySelector from "./QuantitySelector";
-import { product } from "../../data/product";
+import { MapPin, Phone, User, ShoppingBag } from "lucide-react";
+import { product } from "./../../data/product";
 
 export default function OrderForm() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [wilaya, setWilaya] = useState("");
-  const [commune, setCommune] = useState("");
-  const [address, setAddress] = useState("");
   const [quantity, setQuantity] = useState(1);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const order = {
-      product: product.name,
-      name,
-      phone,
-      wilaya,
-      commune,
-      address,
-      quantity,
-    };
-
-    console.log("Order:", order);
-
-    alert("تم تسجيل طلبك بنجاح");
-  };
 
   return (
     <section
       id="order"
-      className="bg-[#080a0b] px-4 py-8 md:py-16"
+      dir="rtl"
+      className="relative overflow-hidden bg-[#080a0b] px-4 py-14 md:py-20"
     >
-      <div className="mx-auto max-w-3xl">
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-600/10 blur-[130px]" />
 
-        <div className="relative overflow-hidden rounded-3xl border border-red-600 bg-[#111315] p-5 shadow-[0_0_60px_rgba(239,68,68,0.12)] md:p-10">
+      <div className="relative mx-auto max-w-5xl">
 
-          {/* Glow */}
-          <div className="pointer-events-none absolute -right-32 -top-32 h-64 w-64 rounded-full bg-red-600/10 blur-[100px]" />
+        {/* Header */}
+        <div className="mx-auto max-w-xl text-center">
+          <p className="text-sm font-bold text-red-500">
+            الطلب
+          </p>
 
-          <div className="relative">
+          <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl">
+            اطلب منتجك الآن
+          </h2>
 
-            {/* Title */}
-            <div className="mb-7 text-center">
-              <h2 className="text-3xl font-black text-white md:text-4xl">
-                اطلب حذاء{" "}
-                <span className="text-red-500">
-                  HOKA
-                </span>{" "}
-                الآن
-              </h2>
+          <p className="mt-3 text-sm leading-6 text-gray-400">
+            أدخل معلوماتك وسنتواصل معك لتأكيد طلبك.
+          </p>
+        </div>
 
-              <p className="mt-2 text-sm text-gray-400">
-                املأ معلوماتك وسيتم التواصل معك لتأكيد طلبك
-              </p>
+        {/* Form card */}
+        <div className="mx-auto mt-8 max-w-2xl rounded-3xl border border-white/10 bg-[#111315]/80 p-5 shadow-2xl backdrop-blur-xl sm:p-7">
+
+          <div className="space-y-3">
+
+            {/* Name */}
+            <div className="relative">
+              <User
+                size={18}
+                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+              />
+
+              <input
+                type="text"
+                placeholder="الاسم الكامل"
+                className="
+                  h-14
+                  w-full
+                  rounded-xl
+                  border
+                  border-white/10
+                  bg-white/[0.04]
+                  pr-12
+                  pl-4
+                  text-right
+                  text-sm
+                  text-white
+                  outline-none
+                  placeholder:text-gray-500
+                  transition
+                  focus:border-red-500/60
+                  focus:bg-white/[0.06]
+                "
+              />
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-3"
-              dir="rtl"
-            >
-
-              <FormField
-                icon={User}
-                placeholder="الاسم الكامل"
-                value={name}
-                onChange={setName}
+            {/* Phone */}
+            <div className="relative">
+              <Phone
+                size={18}
+                className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
               />
 
-              <FormField
-                icon={Phone}
-                placeholder="رقم الهاتف"
+              <input
                 type="tel"
-                value={phone}
-                onChange={setPhone}
+                placeholder="رقم الهاتف"
+                dir="rtl"
+                className="
+                  h-14
+                  w-full
+                  rounded-xl
+                  border
+                  border-white/10
+                  bg-white/[0.04]
+                  pr-12
+                  pl-4
+                  text-right
+                  text-sm
+                  text-white
+                  outline-none
+                  placeholder:text-gray-500
+                  transition
+                  focus:border-red-500/60
+                  focus:bg-white/[0.06]
+                "
               />
+            </div>
 
-              <LocationSelect
-                type="wilaya"
-                value={wilaya}
-                onChange={setWilaya}
-              />
-
-              <LocationSelect
-                type="commune"
-                value={commune}
-                onChange={setCommune}
-              />
+            {/* Location */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 
               <div className="relative">
-                <Home
-                  size={22}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"
+                <MapPin
+                  size={18}
+                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
                 />
 
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) =>
-                    setAddress(e.target.value)
+                <select
+                  defaultValue=""
+                  className="
+                    h-14
+                    w-full
+                    appearance-none
+                    rounded-xl
+                    border
+                    border-white/10
+                    bg-[#151719]
+                    pr-12
+                    pl-4
+                    text-sm
+                    text-gray-400
+                    outline-none
+                    transition
+                    focus:border-red-500/60
+                  "
+                >
+                  <option value="" disabled>
+                    اختر الولاية
+                  </option>
+                  <option>الجزائر</option>
+                  <option>وهران</option>
+                  <option>تلمسان</option>
+                  <option>سطيف</option>
+                  <option>قسنطينة</option>
+                </select>
+              </div>
+
+              <div className="relative">
+                <MapPin
+                  size={18}
+                  className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
+                />
+
+                <select
+                  defaultValue=""
+                  className="
+                    h-14
+                    w-full
+                    appearance-none
+                    rounded-xl
+                    border
+                    border-white/10
+                    bg-[#151719]
+                    pr-12
+                    pl-4
+                    text-sm
+                    text-gray-400
+                    outline-none
+                    transition
+                    focus:border-red-500/60
+                  "
+                >
+                  <option value="" disabled>
+                    اختر البلدية
+                  </option>
+                  <option>بلدية 1</option>
+                  <option>بلدية 2</option>
+                </select>
+              </div>
+
+            </div>
+
+            {/* Quantity */}
+            <div className="flex h-14 items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-4">
+
+              <div className="flex items-center gap-3">
+                <ShoppingBag
+                  size={18}
+                  className="text-gray-500"
+                />
+
+                <span className="text-sm text-gray-400">
+                  الكمية
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuantity((q) => Math.max(1, q - 1))
                   }
-                  placeholder="توصيل إلى المنزل"
-                  className="h-16 w-full rounded-xl border border-red-600/80 bg-[#151719] px-14 text-right text-base text-white outline-none transition placeholder:text-gray-400 focus:border-red-400 focus:ring-2 focus:ring-red-500/20"
-                />
-              </div>
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-lg text-white transition hover:bg-white/10"
+                >
+                  −
+                </button>
 
-              <div className="pt-2">
-                <QuantitySelector
-                  quantity={quantity}
-                  onChange={setQuantity}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="group relative mt-2 flex h-16 w-full items-center justify-center gap-3 overflow-hidden rounded-xl bg-red-600 text-xl font-black text-white shadow-xl shadow-red-600/20 transition hover:bg-red-500 active:scale-[0.98]"
-              >
-                <span className="relative z-10">
-                  اطلب الآن
+                <span className="w-5 text-center text-sm font-bold text-white">
+                  {quantity}
                 </span>
 
-                <ShoppingCart
-                  size={22}
-                  className="relative z-10"
-                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setQuantity((q) => q + 1)
+                  }
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-lg text-white transition hover:bg-white/10"
+                >
+                  +
+                </button>
 
-                {/* Shine */}
-                <span className="absolute -left-20 top-0 h-full w-16 -skew-x-12 bg-white/20 transition-all duration-700 group-hover:left-[120%]" />
-              </button>
+              </div>
+            </div>
 
-            </form>
           </div>
+
+          {/* Order summary */}
+          <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-5">
+
+            <span className="text-sm text-gray-400">
+              المجموع
+            </span>
+
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-white">
+                {(product.price * quantity).toLocaleString("ar-DZ")}
+              </span>
+
+              <span className="text-sm font-bold text-red-500">
+                دج
+              </span>
+            </div>
+
+          </div>
+
+          {/* Submit */}
+          <button
+            type="button"
+            className="
+              mt-5
+              flex
+              h-14
+              w-full
+              items-center
+              justify-center
+              rounded-xl
+              bg-red-600
+              text-base
+              font-black
+              text-white
+              shadow-xl
+              shadow-red-600/20
+              transition
+              hover:bg-red-500
+              hover:shadow-red-600/30
+              active:scale-[0.98]
+            "
+          >
+            تأكيد الطلب
+          </button>
+
+          <p className="mt-3 text-center text-xs text-gray-500">
+            سيتم التواصل معك لتأكيد الطلب قبل الشحن.
+          </p>
         </div>
       </div>
     </section>
