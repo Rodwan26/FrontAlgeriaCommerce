@@ -10,7 +10,7 @@ import {
   Minus,
 } from "lucide-react";
 
-import { product } from "./../../data/product";
+import { product } from "../data/product";
 
 type DeliveryMethod = "home" | "office";
 

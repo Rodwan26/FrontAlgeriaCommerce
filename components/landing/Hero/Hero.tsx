@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 import { useEffect, useState } from "react";
-import { product } from "../../data/product";
+import { product } from "../data/product";
 
 const slides = [
   {
