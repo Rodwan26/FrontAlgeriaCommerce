@@ -5,12 +5,12 @@ import {
   User,
   Phone,
   MapPin,
-  Home,
   Plus,
   Minus,
 } from "lucide-react";
 
 import { product } from "../data/product";
+import { useLocations } from "../hooks/useLocations";
 
 type DeliveryMethod = "home" | "office";
 
@@ -27,8 +27,11 @@ export default function OrderForm() {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [wilaya, setWilaya] = useState("");
-  const [commune, setCommune] = useState("");
+  const [wilayaCode, setWilayaCode] = useState<number | "">("");
+  const [communeCode, setCommuneCode] = useState("");
+  const [activeField, setActiveField] = useState<"" | "name" | "phone">("");
+
+  const { wilayas, communes, selectWilaya } = useLocations();
 
   const [loading, setLoading] = useState(false);
 
@@ -52,12 +55,12 @@ export default function OrderForm() {
       return;
     }
 
-    if (!wilaya) {
+    if (!wilayaCode) {
       alert("يرجى اختيار الولاية");
       return;
     }
 
-    if (!commune) {
+    if (!communeCode) {
       alert("يرجى اختيار البلدية");
       return;
     }
@@ -72,8 +75,8 @@ export default function OrderForm() {
       console.log({
         name,
         phone,
-        wilaya,
-        commune,
+        wilaya: wilayaCode,
+        commune: communeCode,
         quantity,
         deliveryMethod,
         deliveryPrice,
@@ -213,6 +216,26 @@ export default function OrderForm() {
             "
           >
 
+            {/* Icon */}
+
+            <div
+              className="
+                flex
+                w-[76px]
+                shrink-0
+                items-center
+                justify-center
+                border-l-2
+                border-[#4018b8]
+              "
+              style={{
+                backgroundColor: activeField === "name" ? "#4018b8" : "#191919",
+                color: activeField === "name" ? "white" : "#a7a7a7",
+              }}
+            >
+              <User size={27} strokeWidth={1.8} />
+            </div>
+
             {/* Input */}
 
             <input
@@ -221,7 +244,10 @@ export default function OrderForm() {
               onChange={(e) =>
                 setName(e.target.value)
               }
+              onFocus={() => setActiveField("name")}
+              onBlur={() => setActiveField("")}
               placeholder="الاسم"
+              dir="rtl"
               className="
                 min-w-0
                 flex-1
@@ -236,24 +262,6 @@ export default function OrderForm() {
                 placeholder:font-bold
               "
             />
-
-            {/* Icon */}
-
-            <div
-              className="
-                flex
-                w-[76px]
-                shrink-0
-                items-center
-                justify-center
-                border-r-2
-                border-[#4018b8]
-                bg-[#191919]
-                text-[#a7a7a7]
-              "
-            >
-              <User size={27} strokeWidth={1.8} />
-            </div>
 
           </div>
 
@@ -274,6 +282,26 @@ export default function OrderForm() {
             "
           >
 
+            {/* Icon */}
+
+            <div
+              className="
+                flex
+                w-[76px]
+                shrink-0
+                items-center
+                justify-center
+                border-l-2
+                border-[#4018b8]
+              "
+              style={{
+                backgroundColor: activeField === "phone" ? "#4018b8" : "#191919",
+                color: activeField === "phone" ? "white" : "#a7a7a7",
+              }}
+            >
+              <Phone size={27} strokeWidth={1.8} />
+            </div>
+
             {/* Input */}
 
             <input
@@ -282,15 +310,17 @@ export default function OrderForm() {
               onChange={(e) =>
                 setPhone(e.target.value)
               }
+              onFocus={() => setActiveField("phone")}
+              onBlur={() => setActiveField("")}
               placeholder="رقم الهاتف"
-              dir="ltr"
+              dir="rtl"
               inputMode="tel"
               className="
                 min-w-0
                 flex-1
                 bg-transparent
                 px-5
-                text-left
+                text-right
                 text-lg
                 font-bold
                 tracking-wide
@@ -301,24 +331,6 @@ export default function OrderForm() {
                 placeholder:text-right
               "
             />
-
-            {/* Icon */}
-
-            <div
-              className="
-                flex
-                w-[76px]
-                shrink-0
-                items-center
-                justify-center
-                border-r-2
-                border-[#4018b8]
-                bg-[#191919]
-                text-[#a7a7a7]
-              "
-            >
-              <Phone size={27} strokeWidth={1.8} />
-            </div>
 
           </div>
 
@@ -354,10 +366,13 @@ export default function OrderForm() {
             />
 
             <select
-              value={wilaya}
-              onChange={(e) =>
-                setWilaya(e.target.value)
-              }
+              value={wilayaCode}
+              onChange={(e) => {
+                const code = Number(e.target.value);
+                setWilayaCode(code);
+                setCommuneCode("");
+                selectWilaya(code);
+              }}
               className={`
                 h-full
                 w-full
@@ -370,7 +385,7 @@ export default function OrderForm() {
                 font-bold
                 outline-none
                 ${
-                  wilaya
+                  wilayaCode
                     ? "text-white"
                     : "text-[#999]"
                 }
@@ -385,25 +400,15 @@ export default function OrderForm() {
                 اختر الولاية
               </option>
 
-              <option value="الجزائر">
-                الجزائر
-              </option>
-
-              <option value="وهران">
-                وهران
-              </option>
-
-              <option value="تلمسان">
-                تلمسان
-              </option>
-
-              <option value="سطيف">
-                سطيف
-              </option>
-
-              <option value="قسنطينة">
-                قسنطينة
-              </option>
+              {wilayas.map((w) => (
+                <option
+                  key={w.code}
+                  value={w.code}
+                  className="bg-[#181818]"
+                >
+                  {String(w.code).padStart(2, "0")} - {w.nameAr}
+                </option>
+              ))}
 
             </select>
 
@@ -441,10 +446,11 @@ export default function OrderForm() {
             />
 
             <select
-              value={commune}
+              value={communeCode}
               onChange={(e) =>
-                setCommune(e.target.value)
+                setCommuneCode(e.target.value)
               }
+              disabled={!wilayaCode}
               className={`
                 h-full
                 w-full
@@ -457,10 +463,11 @@ export default function OrderForm() {
                 font-bold
                 outline-none
                 ${
-                  commune
+                  communeCode
                     ? "text-white"
                     : "text-[#999]"
                 }
+                ${!wilayaCode ? "opacity-50" : ""}
               `}
             >
 
@@ -469,20 +476,20 @@ export default function OrderForm() {
                 disabled
                 className="bg-[#181818]"
               >
-                اختر البلدية
+                {wilayaCode
+                  ? "اختر البلدية"
+                  : "اختر الولاية أولاً"}
               </option>
 
-              <option value="بلدية 1">
-                بلدية 1
-              </option>
-
-              <option value="بلدية 2">
-                بلدية 2
-              </option>
-
-              <option value="بلدية 3">
-                بلدية 3
-              </option>
+              {communes.map((c) => (
+                <option
+                  key={c.code}
+                  value={c.code}
+                  className="bg-[#181818]"
+                >
+                  {c.nameAr}
+                </option>
+              ))}
 
             </select>
 
@@ -492,104 +499,72 @@ export default function OrderForm() {
               DELIVERY
           ======================================= */}
 
-          <button
-            type="button"
-            onClick={() =>
-              setDeliveryMethod(
-                deliveryMethod === "home"
-                  ? "office"
-                  : "home"
-              )
-            }
+          <div
             className="
-              flex
+              relative
               h-[62px]
               w-full
-              items-center
-              justify-between
+              overflow-hidden
               rounded-2xl
               border-2
               border-[#4018b8]
               bg-[#181818]
-              px-5
-              text-right
-              transition
-              active:scale-[0.99]
             "
           >
 
-            <div className="flex items-center gap-4">
-
-              <div
-                className={`
-                  flex
-                  h-10
-                  w-10
-                  items-center
-                  justify-center
-                  rounded-xl
-                  transition-all
-                  ${
-                    deliveryMethod === "home"
-                      ? "bg-[#4018b8] text-white"
-                      : "bg-[#292929] text-[#999]"
-                  }
-                `}
-              >
-                {deliveryMethod === "home" ? (
-                  <Home size={21} />
-                ) : (
-                  <MapPin size={21} />
-                )}
-              </div>
-
-              <div className="text-right">
-
-                <p className="text-lg font-black text-white">
-                  {deliveryMethod === "home"
-                    ? "توصيل إلى المنزل"
-                    : "توصيل إلى المكتب"}
-                </p>
-
-                <p className="mt-0.5 text-sm font-bold text-[#888]">
-                  {formatPrice(deliveryPrice)} دج
-                </p>
-
-              </div>
-
-            </div>
-
-            <div
+            <MapPin
+              size={23}
+              strokeWidth={1.8}
               className="
-                flex
-                h-7
-                w-7
-                items-center
-                justify-center
-                rounded-full
-                border-2
-                border-[#4018b8]
+                pointer-events-none
+                absolute
+                right-5
+                top-1/2
+                z-10
+                -translate-y-1/2
+                text-[#999]
+              "
+            />
+
+            <select
+              value={deliveryMethod}
+              onChange={(e) =>
+                setDeliveryMethod(
+                  e.target.value as DeliveryMethod
+                )
+              }
+              className="
+                h-full
+                w-full
+                appearance-none
+                bg-transparent
+                px-5
+                pr-14
+                text-right
+                text-lg
+                font-bold
+                text-white
+                outline-none
               "
             >
 
-              <div
-                className={`
-                  h-3
-                  w-3
-                  rounded-full
-                  bg-[#4018b8]
-                  transition
-                  ${
-                    deliveryMethod === "home"
-                      ? "opacity-100"
-                      : "opacity-0"
-                  }
-                `}
-              />
+              <option
+                value="home"
+                className="bg-[#181818]"
+              >
+                توصيل إلى المنزل — {formatPrice(deliveryPrices.home)} دج
+              </option>
 
-            </div>
+              <option
+                value="office"
+                className="bg-[#181818]"
+              >
+                توصيل إلى المكتب — {formatPrice(deliveryPrices.office)} دج
+              </option>
 
-          </button>
+            </select>
+
+          </div>
 
           {/* =======================================
               QUANTITY

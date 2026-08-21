@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ArrowDown } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { product } from "../data/product";
 
 const slides = [
@@ -35,16 +35,6 @@ export default function Hero() {
       block: "start",
     });
   };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveSlide((current) =>
-        current === slides.length - 1 ? 0 : current + 1
-      );
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const currentSlide = slides[activeSlide];
 
@@ -105,12 +95,12 @@ export default function Hero() {
             className="
               relative
               flex
-              h-[330px]
+              h-[400px]
               w-full
               items-center
               justify-center
-              sm:h-[390px]
-              md:h-[470px]
+              sm:h-[460px]
+              md:h-[560px]
             "
           >
             {/* Glow */}
