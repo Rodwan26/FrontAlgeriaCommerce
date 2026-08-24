@@ -1,0 +1,1113 @@
+﻿"use client";
+
+import {
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  GripVertical,
+  ImagePlus,
+  Monitor,
+  Palette,
+  Plus,
+  Smartphone,
+  Trash2,
+  Type,
+  ShoppingBag,
+  Star,
+  MessageSquare,
+  HelpCircle,
+  Timer,
+  FileText,
+} from "lucide-react";
+
+import { useMemo, useState } from "react";
+
+type SectionType =
+  | "hero"
+  | "product"
+  | "features"
+  | "gallery"
+  | "testimonials"
+  | "faq"
+  | "countdown"
+  | "order";
+
+type LandingSection = {
+  id: string;
+  type: SectionType;
+  title: string;
+  enabled: boolean;
+};
+
+type LandingSettings = {
+  primaryColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  textColor: string;
+  buttonText: string;
+  fontFamily: string;
+};
+
+const SECTION_LABELS: Record<SectionType, string> = {
+  hero: "Hero",
+  product: "Product",
+  features: "Features",
+  gallery: "Gallery",
+  testimonials: "Testimonials",
+  faq: "FAQ",
+  countdown: "Countdown",
+  order: "Order Form",
+};
+
+const SECTION_ICONS: Record<SectionType, typeof Type> = {
+  hero: Type,
+  product: ShoppingBag,
+  features: Star,
+  gallery: ImagePlus,
+  testimonials: MessageSquare,
+  faq: HelpCircle,
+  countdown: Timer,
+  order: FileText,
+};
+
+const INITIAL_SECTIONS: LandingSection[] = [
+  {
+    id: "hero",
+    type: "hero",
+    title: "Hero",
+    enabled: true,
+  },
+  {
+    id: "product",
+    type: "product",
+    title: "Product",
+    enabled: true,
+  },
+  {
+    id: "features",
+    type: "features",
+    title: "Features",
+    enabled: true,
+  },
+  {
+    id: "gallery",
+    type: "gallery",
+    title: "Gallery",
+    enabled: true,
+  },
+  {
+    id: "testimonials",
+    type: "testimonials",
+    title: "Testimonials",
+    enabled: true,
+  },
+  {
+    id: "faq",
+    type: "faq",
+    title: "FAQ",
+    enabled: true,
+  },
+  {
+    id: "countdown",
+    type: "countdown",
+    title: "Countdown",
+    enabled: false,
+  },
+  {
+    id: "order",
+    type: "order",
+    title: "Order Form",
+    enabled: true,
+  },
+];
+
+export default function LandingPageBuilder() {
+  const [sections, setSections] =
+    useState<LandingSection[]>(INITIAL_SECTIONS);
+
+  const [selectedSection, setSelectedSection] =
+    useState<string>("hero");
+
+  const [previewMode, setPreviewMode] =
+    useState<"desktop" | "mobile">("desktop");
+
+  const [settings, setSettings] =
+    useState<LandingSettings>({
+      primaryColor: "#ef2028",
+      secondaryColor: "#111827",
+      backgroundColor: "#ffffff",
+      textColor: "#111827",
+      buttonText: "Order Now",
+      fontFamily: "Inter",
+    });
+
+  const [showSectionLibrary, setShowSectionLibrary] =
+    useState(false);
+
+  const selected = useMemo(
+    () =>
+      sections.find(
+        (section) =>
+          section.id === selectedSection
+      ),
+    [sections, selectedSection]
+  );
+
+  function updateSetting(
+    key: keyof LandingSettings,
+    value: string
+  ) {
+    setSettings((current) => ({
+      ...current,
+      [key]: value,
+    }));
+  }
+
+  function addSection(type: SectionType) {
+    const id = `${type}-${Date.now()}`;
+
+    const newSection: LandingSection = {
+      id,
+      type,
+      title: SECTION_LABELS[type],
+      enabled: true,
+    };
+
+    setSections((current) => [
+      ...current,
+      newSection,
+    ]);
+
+    setSelectedSection(id);
+    setShowSectionLibrary(false);
+  }
+
+  function removeSection(id: string) {
+    setSections((current) =>
+      current.filter(
+        (section) => section.id !== id
+      )
+    );
+
+    if (selectedSection === id) {
+      setSelectedSection(
+        sections.find(
+          (section) => section.id !== id
+        )?.id ?? ""
+      );
+    }
+  }
+
+  function toggleSection(id: string) {
+    setSections((current) =>
+      current.map((section) =>
+        section.id === id
+          ? {
+              ...section,
+              enabled: !section.enabled,
+            }
+          : section
+      )
+    );
+  }
+
+  function moveSection(
+    id: string,
+    direction: "up" | "down"
+  ) {
+    setSections((current) => {
+      const index = current.findIndex(
+        (section) => section.id === id
+      );
+
+      if (index === -1) {
+        return current;
+      }
+
+      const targetIndex =
+        direction === "up"
+          ? index - 1
+          : index + 1;
+
+      if (
+        targetIndex < 0 ||
+        targetIndex >= current.length
+      ) {
+        return current;
+      }
+
+      const next = [...current];
+
+      const temp = next[index];
+
+      next[index] = next[targetIndex];
+      next[targetIndex] = temp;
+
+      return next;
+    });
+  }
+
+  function handleSave() {
+    console.log("Landing page:", {
+      sections,
+      settings,
+    });
+
+    alert(
+      "Landing page configuration saved locally for now."
+    );
+  }
+
+  function renderPreviewSection(
+    section: LandingSection
+  ) {
+    if (!section.enabled) {
+      return null;
+    }
+
+    switch (section.type) {
+      case "hero":
+        return (
+          <section
+            key={section.id}
+            className="relative overflow-hidden px-6 py-20 text-center"
+            style={{
+              backgroundColor:
+                settings.secondaryColor,
+              color: "#ffffff",
+            }}
+          >
+            <div className="mx-auto max-w-3xl">
+              <p
+                className="mb-4 text-sm font-semibold uppercase tracking-[0.2em]"
+                style={{
+                  color:
+                    settings.primaryColor,
+                }}
+              >
+                Premium Product
+              </p>
+
+              <h1 className="text-4xl font-bold sm:text-6xl">
+                Your Product
+              </h1>
+
+              <p className="mx-auto mt-5 max-w-xl text-base text-gray-300 sm:text-lg">
+                Build a beautiful product landing
+                page that converts visitors into
+                customers.
+              </p>
+
+              <button
+                type="button"
+                className="mt-8 rounded-xl px-7 py-3.5 text-sm font-bold text-white shadow-lg"
+                style={{
+                  backgroundColor:
+                    settings.primaryColor,
+                }}
+              >
+                {settings.buttonText}
+              </button>
+            </div>
+          </section>
+        );
+
+      case "product":
+        return (
+          <section
+            key={section.id}
+            className="px-6 py-16"
+            style={{
+              backgroundColor:
+                settings.backgroundColor,
+            }}
+          >
+            <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-2 md:items-center">
+              <div className="flex aspect-square items-center justify-center rounded-2xl bg-gray-100">
+                <ImagePlus
+                  size={48}
+                  className="text-gray-300"
+                />
+              </div>
+
+              <div>
+                <p
+                  className="text-sm font-semibold uppercase tracking-wider"
+                  style={{
+                    color:
+                      settings.primaryColor,
+                  }}
+                >
+                  Product
+                </p>
+
+                <h2
+                  className="mt-3 text-3xl font-bold"
+                  style={{
+                    color: settings.textColor,
+                  }}
+                >
+                  Premium Product
+                </h2>
+
+                <p className="mt-4 leading-7 text-gray-500">
+                  Add your product description,
+                  benefits, specifications and
+                  pricing here.
+                </p>
+
+                <div className="mt-6 text-3xl font-bold">
+                  29,900 DA
+                </div>
+
+                <button
+                  type="button"
+                  className="mt-6 rounded-xl px-6 py-3 text-sm font-bold text-white"
+                  style={{
+                    backgroundColor:
+                      settings.primaryColor,
+                  }}
+                >
+                  {settings.buttonText}
+                </button>
+              </div>
+            </div>
+          </section>
+        );
+
+      case "features":
+        return (
+          <section
+            key={section.id}
+            className="bg-gray-50 px-6 py-16"
+          >
+            <div className="mx-auto max-w-5xl">
+              <div className="text-center">
+                <h2
+                  className="text-3xl font-bold"
+                  style={{
+                    color: settings.textColor,
+                  }}
+                >
+                  Why choose this product?
+                </h2>
+
+                <p className="mt-3 text-gray-500">
+                  Highlight the most important
+                  benefits of your product.
+                </p>
+              </div>
+
+              <div className="mt-10 grid gap-5 md:grid-cols-3">
+                {[
+                  "Premium Quality",
+                  "Fast Delivery",
+                  "Easy to Use",
+                ].map((feature) => (
+                  <div
+                    key={feature}
+                    className="rounded-2xl bg-white p-6 text-center shadow-sm"
+                  >
+                    <div
+                      className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white"
+                      style={{
+                        backgroundColor:
+                          settings.primaryColor,
+                      }}
+                    >
+                      <Star size={20} />
+                    </div>
+
+                    <h3 className="mt-4 font-bold">
+                      {feature}
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-6 text-gray-500">
+                      Add a short description for
+                      this feature.
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      case "gallery":
+        return (
+          <section
+            key={section.id}
+            className="px-6 py-16"
+          >
+            <div className="mx-auto max-w-5xl">
+              <h2 className="text-center text-3xl font-bold">
+                Product Gallery
+              </h2>
+
+              <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+                {[1, 2, 3, 4].map((item) => (
+                  <div
+                    key={item}
+                    className="flex aspect-square items-center justify-center rounded-xl bg-gray-100"
+                  >
+                    <ImagePlus className="text-gray-300" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      case "testimonials":
+        return (
+          <section
+            key={section.id}
+            className="bg-gray-50 px-6 py-16"
+          >
+            <div className="mx-auto max-w-5xl">
+              <h2 className="text-center text-3xl font-bold">
+                What our customers say
+              </h2>
+
+              <div className="mt-8 grid gap-5 md:grid-cols-3">
+                {[1, 2, 3].map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl bg-white p-6 shadow-sm"
+                  >
+                    <div
+                      className="flex gap-1"
+                      style={{
+                        color:
+                          settings.primaryColor,
+                      }}
+                    >
+                      {"★★★★★"}
+                    </div>
+
+                    <p className="mt-4 text-sm leading-6 text-gray-600">
+                      “Amazing product. I am very
+                      happy with my purchase.”
+                    </p>
+
+                    <p className="mt-5 text-sm font-bold">
+                      Customer Name
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      case "faq":
+        return (
+          <section
+            key={section.id}
+            className="px-6 py-16"
+          >
+            <div className="mx-auto max-w-3xl">
+              <h2 className="text-center text-3xl font-bold">
+                Frequently Asked Questions
+              </h2>
+
+              <div className="mt-8 space-y-3">
+                {[
+                  "How long does delivery take?",
+                  "Can I return the product?",
+                  "What payment methods are available?",
+                ].map((question) => (
+                  <div
+                    key={question}
+                    className="rounded-xl border border-gray-200 bg-white p-5"
+                  >
+                    <p className="font-semibold">
+                      {question}
+                    </p>
+
+                    <p className="mt-2 text-sm text-gray-500">
+                      Add your answer to this
+                      question.
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      case "countdown":
+        return (
+          <section
+            key={section.id}
+            className="px-6 py-14 text-center text-white"
+            style={{
+              backgroundColor:
+                settings.primaryColor,
+            }}
+          >
+            <h2 className="text-3xl font-bold">
+              Special Offer Ends Soon
+            </h2>
+
+            <div className="mt-6 flex justify-center gap-3">
+              {["02", "14", "38", "52"].map(
+                (value, index) => (
+                  <div
+                    key={index}
+                    className="rounded-xl bg-white/15 px-4 py-3"
+                  >
+                    <div className="text-2xl font-bold">
+                      {value}
+                    </div>
+
+                    <div className="text-xs opacity-70">
+                      {[
+                        "Days",
+                        "Hours",
+                        "Min",
+                        "Sec",
+                      ][index]}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </section>
+        );
+
+      case "order":
+        return (
+          <section
+            key={section.id}
+            className="bg-gray-50 px-6 py-16"
+          >
+            <div className="mx-auto max-w-xl">
+              <div className="rounded-2xl bg-white p-6 shadow-lg sm:p-8">
+                <h2 className="text-center text-3xl font-bold">
+                  Order Now
+                </h2>
+
+                <p className="mt-2 text-center text-sm text-gray-500">
+                  Fill in your information and
+                  we will contact you.
+                </p>
+
+                <div className="mt-7 space-y-4">
+                  {[
+                    "Full name",
+                    "Phone number",
+                    "Wilaya",
+                    "Commune",
+                  ].map((field) => (
+                    <input
+                      key={field}
+                      placeholder={field}
+                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none"
+                    />
+                  ))}
+
+                  <button
+                    type="button"
+                    className="w-full rounded-xl py-3.5 text-sm font-bold text-white"
+                    style={{
+                      backgroundColor:
+                        settings.primaryColor,
+                    }}
+                  >
+                    {settings.buttonText}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+
+      default:
+        return null;
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Top bar */}
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+        <div className="flex h-16 items-center justify-between px-5">
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">
+              Landing Page Builder
+            </h1>
+
+            <p className="hidden text-xs text-gray-500 sm:block">
+              Create a custom landing page for your product
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="hidden items-center rounded-lg border border-gray-200 p-1 sm:flex">
+              <button
+                type="button"
+                onClick={() =>
+                  setPreviewMode("desktop")
+                }
+                className={`rounded-md p-2 ${
+                  previewMode === "desktop"
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-400"
+                }`}
+              >
+                <Monitor size={17} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPreviewMode("mobile")
+                }
+                className={`rounded-md p-2 ${
+                  previewMode === "mobile"
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-400"
+                }`}
+              >
+                <Smartphone size={17} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <Eye size={16} />
+              Preview
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+              style={{
+                backgroundColor:
+                  settings.primaryColor,
+              }}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+        {/* Left sidebar */}
+        <aside className="hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 bg-white lg:block">
+          <div className="border-b border-gray-200 p-5">
+            <h2 className="text-sm font-semibold text-gray-900">
+              Page structure
+            </h2>
+
+            <p className="mt-1 text-xs text-gray-500">
+              Arrange and manage your sections.
+            </p>
+          </div>
+
+          <div className="space-y-2 p-3">
+            {sections.map(
+              (section, index) => {
+                const Icon =
+                  SECTION_ICONS[
+                    section.type
+                  ];
+
+                return (
+                  <div
+                    key={section.id}
+                    className={`rounded-xl border ${
+                      selectedSection ===
+                      section.id
+                        ? "border-indigo-300 bg-indigo-50"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedSection(
+                          section.id
+                        )
+                      }
+                      className="flex w-full items-center gap-2 px-3 py-3 text-left"
+                    >
+                      <GripVertical
+                        size={15}
+                        className="text-gray-400"
+                      />
+
+                      <Icon
+                        size={16}
+                        className="text-gray-500"
+                      />
+
+                      <span className="flex-1 text-sm font-medium text-gray-800">
+                        {section.title}
+                      </span>
+
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          section.enabled
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
+                      />
+                    </button>
+
+                    {selectedSection ===
+                      section.id && (
+                      <div className="flex border-t border-gray-200 px-2 py-2">
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() =>
+                            moveSection(
+                              section.id,
+                              "up"
+                            )
+                          }
+                          className="rounded p-1.5 text-gray-500 hover:bg-white disabled:opacity-30"
+                        >
+                          <ChevronUp
+                            size={15}
+                          />
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={
+                            index ===
+                            sections.length - 1
+                          }
+                          onClick={() =>
+                            moveSection(
+                              section.id,
+                              "down"
+                            )
+                          }
+                          className="rounded p-1.5 text-gray-500 hover:bg-white disabled:opacity-30"
+                        >
+                          <ChevronDown
+                            size={15}
+                          />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toggleSection(
+                              section.id
+                            )
+                          }
+                          className="ml-auto rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-white"
+                        >
+                          {section.enabled
+                            ? "Hide"
+                            : "Show"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeSection(
+                              section.id
+                            )
+                          }
+                          className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2
+                            size={15}
+                          />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowSectionLibrary(
+                  (current) => !current
+                )
+              }
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+            >
+              <Plus size={16} />
+              Add section
+            </button>
+          </div>
+        </aside>
+
+        {/* Preview */}
+        <main className="min-w-0 flex-1 overflow-y-auto bg-gray-100">
+          <div className="flex justify-center px-4 py-8 sm:px-8">
+            <div
+              className={`overflow-hidden bg-white shadow-2xl transition-all ${
+                previewMode === "mobile"
+                  ? "w-[390px] max-w-full"
+                  : "w-full max-w-6xl"
+              }`}
+            >
+              {sections.map(
+                renderPreviewSection
+              )}
+            </div>
+          </div>
+        </main>
+
+        {/* Right sidebar */}
+        <aside className="hidden w-56 shrink-0 overflow-y-auto border-l border-gray-200 bg-white xl:block">
+          <div className="border-b border-gray-200 p-5">
+            <div className="flex items-center gap-2">
+              <Palette
+                size={17}
+                className="text-gray-500"
+              />
+
+              <h2 className="text-sm font-semibold text-gray-900">
+                Design
+              </h2>
+            </div>
+          </div>
+
+          <div className="space-y-6 p-5">
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Primary color
+              </label>
+
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={
+                    settings.primaryColor
+                  }
+                  onChange={(e) =>
+                    updateSetting(
+                      "primaryColor",
+                      e.target.value
+                    )
+                  }
+                  className="h-10 w-12 cursor-pointer rounded-lg border border-gray-300 p-1"
+                />
+
+                <input
+                  value={
+                    settings.primaryColor
+                  }
+                  onChange={(e) =>
+                    updateSetting(
+                      "primaryColor",
+                      e.target.value
+                    )
+                  }
+                  className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Secondary color
+              </label>
+
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  value={
+                    settings.secondaryColor
+                  }
+                  onChange={(e) =>
+                    updateSetting(
+                      "secondaryColor",
+                      e.target.value
+                    )
+                  }
+                  className="h-10 w-12 cursor-pointer rounded-lg border border-gray-300 p-1"
+                />
+
+                <input
+                  value={
+                    settings.secondaryColor
+                  }
+                  onChange={(e) =>
+                    updateSetting(
+                      "secondaryColor",
+                      e.target.value
+                    )
+                  }
+                  className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Background
+              </label>
+
+              <input
+                type="color"
+                value={
+                  settings.backgroundColor
+                }
+                onChange={(e) =>
+                  updateSetting(
+                    "backgroundColor",
+                    e.target.value
+                  )
+                }
+                className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Button text
+              </label>
+
+              <input
+                value={settings.buttonText}
+                onChange={(e) =>
+                  updateSetting(
+                    "buttonText",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Font
+              </label>
+
+              <select
+                value={settings.fontFamily}
+                onChange={(e) =>
+                  updateSetting(
+                    "fontFamily",
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"
+              >
+                <option value="Inter">
+                  Inter
+                </option>
+
+                <option value="Arial">
+                  Arial
+                </option>
+
+                <option value="Georgia">
+                  Georgia
+                </option>
+
+                <option value="system-ui">
+                  System
+                </option>
+              </select>
+            </div>
+
+            {selected && (
+              <div className="border-t border-gray-200 pt-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Selected section
+                </p>
+
+                <p className="mt-2 text-sm font-semibold text-gray-900">
+                  {selected.title}
+                </p>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Section customization will be
+                  expanded here.
+                </p>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      {/* Section library */}
+      {showSectionLibrary && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-200 p-5">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Add section
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Choose a section to add to your
+                  landing page.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowSectionLibrary(false)
+                }
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100"
+              >
+                <Trash2 size={17} />
+              </button>
+            </div>
+
+            <div className="grid gap-3 p-5 sm:grid-cols-2">
+              {(
+                Object.keys(
+                  SECTION_LABELS
+                ) as SectionType[]
+              ).map((type) => {
+                const Icon =
+                  SECTION_ICONS[type];
+
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() =>
+                      addSection(type)
+                    }
+                    className="flex items-center gap-4 rounded-xl border border-gray-200 p-4 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                      <Icon size={18} />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {SECTION_LABELS[type]}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        Add {SECTION_LABELS[type].toLowerCase()} section
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+

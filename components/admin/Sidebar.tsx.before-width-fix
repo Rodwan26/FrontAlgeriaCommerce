@@ -9,18 +9,14 @@ import {
   Store,
   X,
 } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 type SidebarProps = {
   isOpen: boolean;
-  width: number;
+  isCollapsed: boolean;
   onClose: () => void;
-  onWidthChange: (width: number) => void;
+  onToggleCollapse: () => void;
 };
-
-const MIN_WIDTH = 68;
-const MAX_WIDTH = 208;
-const COLLAPSE_THRESHOLD = 110;
 
 const links = [
   {
@@ -50,16 +46,18 @@ const links = [
   },
 ];
 
+const EXPANDED_WIDTH = 208;
+const MIN_WIDTH = 64;
+const COLLAPSE_THRESHOLD = 110;
+
 export default function Sidebar({
   isOpen,
-  width,
+  isCollapsed,
   onClose,
-  onWidthChange,
+  onToggleCollapse,
 }: SidebarProps) {
+  const [width, setWidth] = useState(EXPANDED_WIDTH);
   const dragging = useRef(false);
-  const wasDragged = useRef(false);
-
-  const collapsed = width <= COLLAPSE_THRESHOLD;
 
   const startResize = (
     event: React.PointerEvent<HTMLDivElement>
@@ -69,13 +67,11 @@ export default function Sidebar({
     }
 
     event.preventDefault();
-    event.stopPropagation();
 
     dragging.current = true;
-    wasDragged.current = false;
 
     const startX = event.clientX;
-    const startWidth = width;
+    const startWidth = isCollapsed ? MIN_WIDTH : width;
 
     const handleMove = (moveEvent: PointerEvent) => {
       if (!dragging.current) {
@@ -83,17 +79,26 @@ export default function Sidebar({
       }
 
       const delta = moveEvent.clientX - startX;
-
-      if (Math.abs(delta) > 3) {
-        wasDragged.current = true;
-      }
-
       const nextWidth = Math.max(
         MIN_WIDTH,
-        Math.min(MAX_WIDTH, startWidth + delta)
+        Math.min(EXPANDED_WIDTH, startWidth + delta)
       );
 
-      onWidthChange(nextWidth);
+      setWidth(nextWidth);
+
+      if (
+        !isCollapsed &&
+        nextWidth <= COLLAPSE_THRESHOLD
+      ) {
+        onToggleCollapse();
+      }
+
+      if (
+        isCollapsed &&
+        nextWidth > COLLAPSE_THRESHOLD
+      ) {
+        onToggleCollapse();
+      }
     };
 
     const handleUp = () => {
@@ -122,16 +127,17 @@ export default function Sidebar({
   };
 
   const handleBarClick = () => {
-    if (wasDragged.current) {
-      wasDragged.current = false;
+    if (dragging.current) {
       return;
     }
 
-    if (collapsed) {
-      onWidthChange(MAX_WIDTH);
-    } else {
-      onWidthChange(MIN_WIDTH);
+    if (isCollapsed) {
+      setWidth(EXPANDED_WIDTH);
+      onToggleCollapse();
+      return;
     }
+
+    onToggleCollapse();
   };
 
   return (
@@ -147,7 +153,11 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         style={{
-          width: `${width}px`,
+          width:
+            typeof window !== "undefined" &&
+            window.innerWidth >= 1024
+              ? `${isCollapsed ? MIN_WIDTH : width}px`
+              : undefined,
         }}
         className={`
           fixed inset-y-0 left-0 z-50
@@ -157,39 +167,38 @@ export default function Sidebar({
           transition-[width,transform] duration-200 ease-out
           lg:static lg:z-auto lg:translate-x-0
           lg:shrink-0
-          ${isOpen
-            ? "translate-x-0"
-            : "-translate-x-full"}
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          ${isCollapsed ? "lg:w-16" : ""}
           max-lg:w-52
         `}
       >
-        {/* Clickable top bar */}
+        {/* Top bar */}
         <button
           type="button"
           onClick={handleBarClick}
-          title={
-            collapsed
-              ? "Open sidebar"
-              : "Collapse sidebar"
-          }
           className={`
-            flex h-16 w-full shrink-0
+            flex h-16 shrink-0 w-full
             items-center
             border-b border-gray-200
-            bg-white
             outline-none
             focus:outline-none
             focus-visible:outline-none
             hover:bg-gray-50
-            ${collapsed
+            transition-colors
+            ${isCollapsed
               ? "justify-center px-2"
               : "justify-between px-5"}
           `}
+          title={
+            isCollapsed
+              ? "Open sidebar"
+              : "Collapse sidebar"
+          }
         >
           <div
             className={`
               flex min-w-0 items-center
-              ${collapsed
+              ${isCollapsed
                 ? "justify-center"
                 : "gap-3"}
             `}
@@ -198,50 +207,53 @@ export default function Sidebar({
               className="h-6 w-6 shrink-0 text-indigo-600"
             />
 
-            {!collapsed && (
+            {!isCollapsed && (
               <span className="truncate text-xl font-bold text-gray-900">
                 My Store
               </span>
             )}
           </div>
 
-          {!collapsed && (
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={(event) => {
+          {/* Mobile close */}
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(event) => {
+              event.stopPropagation();
+              onClose();
+            }}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" ||
+                event.key === " "
+              ) {
+                event.preventDefault();
                 event.stopPropagation();
                 onClose();
-              }}
-              onKeyDown={(event) => {
-                if (
-                  event.key === "Enter" ||
-                  event.key === " "
-                ) {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onClose();
-                }
-              }}
-              className="
-                rounded-lg p-2
-                text-gray-500
-                outline-none
-                hover:bg-gray-100
-                lg:hidden
-              "
-              aria-label="Close menu"
-            >
-              <X size={20} />
-            </span>
-          )}
+              }
+            }}
+            className="
+              rounded-lg p-2
+              text-gray-500
+              outline-none
+              focus:outline-none
+              focus-visible:outline-none
+              hover:bg-gray-100
+              lg:hidden
+            "
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </span>
         </button>
 
         {/* Navigation */}
         <nav
           className={`
-            flex-1 overflow-y-auto overflow-x-hidden
-            ${collapsed
+            flex-1 overflow-y-auto
+            overflow-x-hidden
+            scrollbar-thin
+            ${isCollapsed
               ? "space-y-2 p-2"
               : "space-y-2 p-4"}
           `}
@@ -255,7 +267,7 @@ export default function Sidebar({
                 href={link.href}
                 onClick={onClose}
                 title={
-                  collapsed
+                  isCollapsed
                     ? link.title
                     : undefined
                 }
@@ -268,7 +280,7 @@ export default function Sidebar({
                   transition
                   hover:bg-gray-100
                   hover:text-indigo-600
-                  ${collapsed
+                  ${isCollapsed
                     ? "justify-center px-2 py-3"
                     : "gap-3 px-4 py-3"}
                 `}
@@ -278,7 +290,7 @@ export default function Sidebar({
                   className="shrink-0"
                 />
 
-                {!collapsed && (
+                {!isCollapsed && (
                   <span className="font-medium">
                     {link.title}
                   </span>
@@ -288,11 +300,10 @@ export default function Sidebar({
           })}
         </nav>
 
-        {/* Invisible resize edge */}
+        {/* Invisible resize handle */}
         <div
           role="separator"
           aria-label="Resize sidebar"
-          aria-orientation="vertical"
           onPointerDown={startResize}
           className="
             absolute right-0 top-0
@@ -301,8 +312,8 @@ export default function Sidebar({
             select-none
             outline-none
             lg:block
-            hover:bg-gray-200/40
-            active:bg-gray-300/40
+            hover:bg-gray-200/50
+            active:bg-gray-300/50
           "
         />
       </aside>
