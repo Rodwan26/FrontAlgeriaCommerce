@@ -31,7 +31,9 @@ function createSection(
     type,
     title: SECTION_LABELS[type],
     enabled: true,
-    settings: {},
+    settings: {
+      ...defaultSectionSettings[type],
+    },
   };
 }
 
@@ -267,5 +269,6 @@ export function useLandingSections() {
     setShowSectionLibrary,
   };
 }
+
 
 

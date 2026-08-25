@@ -36,8 +36,8 @@ body {
 ======================================== */
 
 /*
-  مهم جدًا:
-  لا يوجد أي خلفية بيضاء للـ inputs/selects.
+  Ù…Ù‡Ù… Ø¬Ø¯Ù‹Ø§:
+  Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø£ÙŠ Ø®Ù„ÙÙŠØ© Ø¨ÙŠØ¶Ø§Ø¡ Ù„Ù„Ù€ inputs/selects.
 */
 
 #order input,
@@ -516,3 +516,36 @@ h6 {
 .landing-builder-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
 .landing-builder-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 .landing-builder-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+
+/* =========================================================
+   GLOBAL CUSTOM SCROLLBAR
+   Reusable across the entire application.
+   ========================================================= */
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+

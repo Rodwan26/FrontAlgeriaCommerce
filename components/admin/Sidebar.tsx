@@ -139,7 +139,7 @@ export default function Sidebar({
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-[9998] bg-black/40 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -150,7 +150,7 @@ export default function Sidebar({
           width: `${width}px`,
         }}
         className={`
-          fixed inset-y-0 left-0 z-50
+          fixed inset-y-0 left-0 z-[9999]
           flex flex-col
           border-r border-gray-200 bg-white
           select-none
@@ -309,3 +309,4 @@ export default function Sidebar({
     </>
   );
 }
+
