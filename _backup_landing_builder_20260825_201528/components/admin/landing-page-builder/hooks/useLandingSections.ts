@@ -11,10 +11,6 @@ import {
   SECTION_LABELS,
 } from "../constants";
 
-import {
-  defaultSectionSettings,
-} from "../../../../lib/landing-page/defaults";
-
 import type {
   LandingSection,
   SectionMoveDirection,
@@ -23,11 +19,10 @@ import type {
 
 function createSection(
   type: SectionType,
-  index: number,
-  id?: string
+  index: number
 ): LandingSection {
   return {
-    id: id ?? `${type}-${index}`,
+    id: `${type}-${Date.now()}-${index}`,
     type,
     title: SECTION_LABELS[type],
     enabled: true,
@@ -117,55 +112,6 @@ export function useLandingSections() {
     []
   );
 
-  const reorderSections = useCallback(
-    (
-      sourceId: string,
-      targetId: string
-    ) => {
-      setSections((current) => {
-        const sourceIndex =
-          current.findIndex(
-            (section) =>
-              section.id === sourceId
-          );
-
-        const targetIndex =
-          current.findIndex(
-            (section) =>
-              section.id === targetId
-          );
-
-        if (
-          sourceIndex === -1 ||
-          targetIndex === -1 ||
-          sourceIndex === targetIndex
-        ) {
-          return current;
-        }
-
-        const next = [...current];
-
-        const [
-          movedSection,
-        ] = next.splice(sourceIndex, 1);
-
-        const adjustedTargetIndex =
-          sourceIndex < targetIndex
-            ? targetIndex - 1
-            : targetIndex;
-
-        next.splice(
-          adjustedTargetIndex,
-          0,
-          movedSection
-        );
-
-        return next;
-      });
-    },
-    []
-  );
-
   const toggleSection = useCallback(
     (sectionId: string) => {
       setSections((current) =>
@@ -223,8 +169,7 @@ export function useLandingSections() {
     (type: SectionType) => {
       const newSection = createSection(
         type,
-        sections.length,
-        `${type}-${crypto.randomUUID()}`
+        sections.length
       );
 
       setSections((current) => [
@@ -258,7 +203,6 @@ export function useLandingSections() {
     setSelectedSection,
 
     moveSection,
-    reorderSections,
     toggleSection,
     removeSection,
     addSection,
@@ -267,5 +211,9 @@ export function useLandingSections() {
     setShowSectionLibrary,
   };
 }
+
+
+
+
 
 

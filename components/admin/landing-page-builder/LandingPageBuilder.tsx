@@ -1,126 +1,181 @@
 ﻿"use client";
-import { useLandingSections } from "./hooks/useLandingSections";
-import { useLandingSettings } from "./hooks/useLandingSettings";
+
+import {
+  useState,
+} from "react";
+
 import {
   ChevronDown,
   ChevronUp,
   Eye,
   GripVertical,
-  ImagePlus,
   Monitor,
   Palette,
   Plus,
   Smartphone,
   Trash2,
-  Type,
-  ShoppingBag,
-  Star,
-  MessageSquare,
-  HelpCircle,
-  Timer,
-  FileText,
+  Settings2,
 } from "lucide-react";
 
-import { useState } from "react";
+import {
+  useLandingSections,
+} from "./hooks/useLandingSections";
 
-type SectionType =
-  | "hero"
-  | "product"
-  | "features"
-  | "gallery"
-  | "testimonials"
-  | "faq"
-  | "countdown"
-  | "order";
+import {
+  useLandingSettings,
+} from "./hooks/useLandingSettings";
 
-type LandingSection = {
-  id: string;
-  type: SectionType;
-  title: string;
-  enabled: boolean;
-};
+import SectionRenderer from "./components/SectionRenderer";
+import PreviewCanvas from "./components/PreviewCanvas";
 
-type LandingSettings = {
-  primaryColor: string;
-  secondaryColor: string;
-  backgroundColor: string;
-  textColor: string;
-  buttonText: string;
-  fontFamily: string;
-};
+import type {
+  LandingFormField,
+  LandingFormFieldType,
+  LandingSection,
+  LandingSettings,
+  SectionType,
+} from "./types";
 
-const SECTION_LABELS: Record<SectionType, string> = {
-  hero: "Hero",
-  product: "Product",
-  features: "Features",
-  gallery: "Gallery",
-  testimonials: "Testimonials",
-  faq: "FAQ",
-  countdown: "Countdown",
-  order: "Order Form",
-};
+import {
+  SECTION_LABELS,
+  SECTION_ICONS,
+} from "./constants";
 
-const SECTION_ICONS: Record<SectionType, typeof Type> = {
-  hero: Type,
-  product: ShoppingBag,
-  features: Star,
-  gallery: ImagePlus,
-  testimonials: MessageSquare,
-  faq: HelpCircle,
-  countdown: Timer,
-  order: FileText,
-};
-
-const INITIAL_SECTIONS: LandingSection[] = [
+const FORM_FIELD_TYPES: {
+  value: LandingFormFieldType;
+  label: string;
+}[] = [
   {
-    id: "hero",
-    type: "hero",
-    title: "Hero",
+    value: "text",
+    label: "Text",
+  },
+  {
+    value: "phone",
+    label: "Phone",
+  },
+  {
+    value: "email",
+    label: "Email",
+  },
+  {
+    value: "number",
+    label: "Number",
+  },
+  {
+    value: "textarea",
+    label: "Textarea",
+  },
+  {
+    value: "select",
+    label: "Select",
+  },
+  {
+    value: "address",
+    label: "Address",
+  },
+  {
+    value: "wilaya",
+    label: "Wilaya",
+  },
+  {
+    value: "commune",
+    label: "Commune",
+  },
+];
+
+const DEFAULT_FORM_FIELDS: LandingFormField[] = [
+  {
+    id: "customer-name",
+    type: "text",
+    label: "Full name",
+    placeholder: "Enter your full name",
+    required: true,
     enabled: true,
   },
   {
-    id: "product",
-    type: "product",
-    title: "Product",
+    id: "customer-phone",
+    type: "phone",
+    label: "Phone number",
+    placeholder: "05XXXXXXXX",
+    required: true,
+    enabled: true,
+    minLength: 10,
+    maxLength: 10,
+  },
+  {
+    id: "customer-wilaya",
+    type: "wilaya",
+    label: "Wilaya",
+    placeholder: "Select Wilaya",
+    required: true,
     enabled: true,
   },
   {
-    id: "features",
-    type: "features",
-    title: "Features",
+    id: "customer-commune",
+    type: "commune",
+    label: "Commune",
+    placeholder: "Select Commune",
+    required: true,
     enabled: true,
   },
   {
-    id: "gallery",
-    type: "gallery",
-    title: "Gallery",
-    enabled: true,
-  },
-  {
-    id: "testimonials",
-    type: "testimonials",
-    title: "Testimonials",
-    enabled: true,
-  },
-  {
-    id: "faq",
-    type: "faq",
-    title: "FAQ",
-    enabled: true,
-  },
-  {
-    id: "countdown",
-    type: "countdown",
-    title: "Countdown",
-    enabled: false,
-  },
-  {
-    id: "order",
-    type: "order",
-    title: "Order Form",
+    id: "customer-address",
+    type: "address",
+    label: "Address",
+    placeholder: "Enter your address",
+    required: false,
     enabled: true,
   },
 ];
+
+const DEFAULT_ORDER_FORM_APPEARANCE = {
+  sectionBackground: "#F9FAFB",
+  formBackground: "#FFFFFF",
+  textColor: "#111827",
+  inputBackground: "#FFFFFF",
+  inputTextColor: "#111827",
+  inputBorderColor: "#D1D5DB",
+  buttonBackground: "#EF2028",
+  buttonTextColor: "#FFFFFF",
+};
+
+function getAppearance(
+  section: LandingSection | null
+) {
+  if (!section) {
+    return DEFAULT_ORDER_FORM_APPEARANCE;
+  }
+
+  const raw =
+    section.settings.appearance;
+
+  if (
+    !raw ||
+    typeof raw !== "object"
+  ) {
+    return DEFAULT_ORDER_FORM_APPEARANCE;
+  }
+
+  return {
+    ...DEFAULT_ORDER_FORM_APPEARANCE,
+    ...(raw as Partial<
+      typeof DEFAULT_ORDER_FORM_APPEARANCE
+    >),
+  };
+}
+
+function getStringSetting(
+  section: LandingSection,
+  key: string,
+  fallback: string
+) {
+  const value =
+    section.settings[key];
+
+  return typeof value === "string"
+    ? value
+    : fallback;
+}
 
 export default function LandingPageBuilder() {
   const {
@@ -130,412 +185,211 @@ export default function LandingPageBuilder() {
     showSectionLibrary,
 
     setSections,
-    selectSection,
     setSelectedSection,
 
     moveSection,
+    reorderSections,
     toggleSection,
     removeSection,
     addSection,
 
-    toggleSectionLibrary,
     setShowSectionLibrary,
   } = useLandingSections();
 
   const {
     settings,
-    setSettings,
     updateSetting,
-    updateSettings,
-    resetSettings,
   } = useLandingSettings();
 
-  const [previewMode, setPreviewMode] =
-    useState<"desktop" | "mobile">("desktop");
+  const [
+    previewMode,
+    setPreviewMode,
+  ] = useState<
+    "desktop" | "mobile"
+  >("desktop");
+
+  const [
+    formFields,
+    setFormFields,
+  ] = useState<LandingFormField[]>(
+    DEFAULT_FORM_FIELDS
+  );
+
+  const [
+    draggedSectionId,
+    setDraggedSectionId,
+  ] = useState<string | null>(null);
+
+  function updateSectionSetting(
+    sectionId: string,
+    key: string,
+    value: unknown
+  ) {
+    setSections((current) =>
+      current.map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              settings: {
+                ...section.settings,
+                [key]: value,
+              },
+            }
+          : section
+      )
+    );
+  }
+
+  function updateOrderFormAppearance(
+    key: keyof typeof DEFAULT_ORDER_FORM_APPEARANCE,
+    value: string
+  ) {
+    if (
+      !selected ||
+      selected.type !== "order-form"
+    ) {
+      return;
+    }
+
+    const appearance =
+      getAppearance(selected);
+
+    updateSectionSetting(
+      selected.id,
+      "appearance",
+      {
+        ...appearance,
+        [key]: value,
+      }
+    );
+  }
+
+  function updateFormField(
+    fieldId: string,
+    updates: Partial<LandingFormField>
+  ) {
+    setFormFields((current) =>
+      current.map((field) =>
+        field.id === fieldId
+          ? {
+              ...field,
+              ...updates,
+            }
+          : field
+      )
+    );
+  }
+
+  function addFormField() {
+    const id =
+      `field-${Date.now()}`;
+
+    setFormFields((current) => [
+      ...current,
+      {
+        id,
+        type: "text",
+        label: "New field",
+        placeholder: "",
+        required: false,
+        enabled: true,
+      },
+    ]);
+  }
+
+  function removeFormField(
+    fieldId: string
+  ) {
+    setFormFields((current) =>
+      current.filter(
+        (field) =>
+          field.id !== fieldId
+      )
+    );
+  }
+
+  function scrollToSection(
+    sectionId: string
+  ) {
+    setSelectedSection(sectionId);
+
+    window.requestAnimationFrame(() => {
+      const element =
+        document.getElementById(
+          `landing-section-${sectionId}`
+        );
+
+      element?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
+  function handleSectionDragStart(
+    event: React.DragEvent<HTMLDivElement>,
+    sectionId: string
+  ) {
+    setDraggedSectionId(sectionId);
+
+    event.dataTransfer.effectAllowed =
+      "move";
+
+    event.dataTransfer.setData(
+      "text/plain",
+      sectionId
+    );
+  }
+
+  function handleSectionDrop(
+    event: React.DragEvent<HTMLDivElement>,
+    targetId: string
+  ) {
+    event.preventDefault();
+
+    const sourceId =
+      event.dataTransfer.getData(
+        "text/plain"
+      ) || draggedSectionId;
+
+    if (
+      sourceId &&
+      sourceId !== targetId
+    ) {
+      reorderSections(
+        sourceId,
+        targetId
+      );
+    }
+
+    setDraggedSectionId(null);
+  }
 
   function handleSave() {
-    console.log("Landing page:", {
-      sections,
-      settings,
-    });
+    console.log(
+      "Landing page:",
+      {
+        sections,
+        settings,
+        formFields,
+      }
+    );
 
     alert(
       "Landing page configuration saved locally for now."
     );
   }
-  function renderPreviewSection(
-    section: LandingSection
-  ) {
-    if (!section.enabled) {
-      return null;
-    }
 
-    switch (section.type) {
-      case "hero":
-        return (
-          <section
-            key={section.id}
-            className="relative overflow-hidden px-6 py-20 text-center"
-            style={{
-              backgroundColor:
-                settings.secondaryColor,
-              color: "#ffffff",
-            }}
-          >
-            <div className="mx-auto max-w-3xl">
-              <p
-                className="mb-4 text-sm font-semibold uppercase tracking-[0.2em]"
-                style={{
-                  color:
-                    settings.primaryColor,
-                }}
-              >
-                Premium Product
-              </p>
+  const isOrderFormSelected =
+    selected?.type === "order-form";
 
-              <h1 className="text-4xl font-bold sm:text-6xl">
-                Your Product
-              </h1>
-
-              <p className="mx-auto mt-5 max-w-xl text-base text-gray-300 sm:text-lg">
-                Build a beautiful product landing
-                page that converts visitors into
-                customers.
-              </p>
-
-              <button
-                type="button"
-                className="mt-8 rounded-xl px-7 py-3.5 text-sm font-bold text-white shadow-lg"
-                style={{
-                  backgroundColor:
-                    settings.primaryColor,
-                }}
-              >
-                {settings.buttonText}
-              </button>
-            </div>
-          </section>
-        );
-
-      case "product":
-        return (
-          <section
-            key={section.id}
-            className="px-6 py-16"
-            style={{
-              backgroundColor:
-                settings.backgroundColor,
-            }}
-          >
-            <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-2 md:items-center">
-              <div className="flex aspect-square items-center justify-center rounded-2xl bg-gray-100">
-                <ImagePlus
-                  size={48}
-                  className="text-gray-300"
-                />
-              </div>
-
-              <div>
-                <p
-                  className="text-sm font-semibold uppercase tracking-wider"
-                  style={{
-                    color:
-                      settings.primaryColor,
-                  }}
-                >
-                  Product
-                </p>
-
-                <h2
-                  className="mt-3 text-3xl font-bold"
-                  style={{
-                    color: settings.textColor,
-                  }}
-                >
-                  Premium Product
-                </h2>
-
-                <p className="mt-4 leading-7 text-gray-500">
-                  Add your product description,
-                  benefits, specifications and
-                  pricing here.
-                </p>
-
-                <div className="mt-6 text-3xl font-bold">
-                  29,900 DA
-                </div>
-
-                <button
-                  type="button"
-                  className="mt-6 rounded-xl px-6 py-3 text-sm font-bold text-white"
-                  style={{
-                    backgroundColor:
-                      settings.primaryColor,
-                  }}
-                >
-                  {settings.buttonText}
-                </button>
-              </div>
-            </div>
-          </section>
-        );
-
-      case "features":
-        return (
-          <section
-            key={section.id}
-            className="bg-gray-50 px-6 py-16"
-          >
-            <div className="mx-auto max-w-5xl">
-              <div className="text-center">
-                <h2
-                  className="text-3xl font-bold"
-                  style={{
-                    color: settings.textColor,
-                  }}
-                >
-                  Why choose this product?
-                </h2>
-
-                <p className="mt-3 text-gray-500">
-                  Highlight the most important
-                  benefits of your product.
-                </p>
-              </div>
-
-              <div className="mt-10 grid gap-5 md:grid-cols-3">
-                {[
-                  "Premium Quality",
-                  "Fast Delivery",
-                  "Easy to Use",
-                ].map((feature) => (
-                  <div
-                    key={feature}
-                    className="rounded-2xl bg-white p-6 text-center shadow-sm"
-                  >
-                    <div
-                      className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white"
-                      style={{
-                        backgroundColor:
-                          settings.primaryColor,
-                      }}
-                    >
-                      <Star size={20} />
-                    </div>
-
-                    <h3 className="mt-4 font-bold">
-                      {feature}
-                    </h3>
-
-                    <p className="mt-2 text-sm leading-6 text-gray-500">
-                      Add a short description for
-                      this feature.
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-
-      case "gallery":
-        return (
-          <section
-            key={section.id}
-            className="px-6 py-16"
-          >
-            <div className="mx-auto max-w-5xl">
-              <h2 className="text-center text-3xl font-bold">
-                Product Gallery
-              </h2>
-
-              <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-                {[1, 2, 3, 4].map((item) => (
-                  <div
-                    key={item}
-                    className="flex aspect-square items-center justify-center rounded-xl bg-gray-100"
-                  >
-                    <ImagePlus className="text-gray-300" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-
-      case "testimonials":
-        return (
-          <section
-            key={section.id}
-            className="bg-gray-50 px-6 py-16"
-          >
-            <div className="mx-auto max-w-5xl">
-              <h2 className="text-center text-3xl font-bold">
-                What our customers say
-              </h2>
-
-              <div className="mt-8 grid gap-5 md:grid-cols-3">
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-2xl bg-white p-6 shadow-sm"
-                  >
-                    <div
-                      className="flex gap-1"
-                      style={{
-                        color:
-                          settings.primaryColor,
-                      }}
-                    >
-                      {"★★★★★"}
-                    </div>
-
-                    <p className="mt-4 text-sm leading-6 text-gray-600">
-                      “Amazing product. I am very
-                      happy with my purchase.”
-                    </p>
-
-                    <p className="mt-5 text-sm font-bold">
-                      Customer Name
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-
-      case "faq":
-        return (
-          <section
-            key={section.id}
-            className="px-6 py-16"
-          >
-            <div className="mx-auto max-w-3xl">
-              <h2 className="text-center text-3xl font-bold">
-                Frequently Asked Questions
-              </h2>
-
-              <div className="mt-8 space-y-3">
-                {[
-                  "How long does delivery take?",
-                  "Can I return the product?",
-                  "What payment methods are available?",
-                ].map((question) => (
-                  <div
-                    key={question}
-                    className="rounded-xl border border-gray-200 bg-white p-5"
-                  >
-                    <p className="font-semibold">
-                      {question}
-                    </p>
-
-                    <p className="mt-2 text-sm text-gray-500">
-                      Add your answer to this
-                      question.
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        );
-
-      case "countdown":
-        return (
-          <section
-            key={section.id}
-            className="px-6 py-14 text-center text-white"
-            style={{
-              backgroundColor:
-                settings.primaryColor,
-            }}
-          >
-            <h2 className="text-3xl font-bold">
-              Special Offer Ends Soon
-            </h2>
-
-            <div className="mt-6 flex justify-center gap-3">
-              {["02", "14", "38", "52"].map(
-                (value, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl bg-white/15 px-4 py-3"
-                  >
-                    <div className="text-2xl font-bold">
-                      {value}
-                    </div>
-
-                    <div className="text-xs opacity-70">
-                      {[
-                        "Days",
-                        "Hours",
-                        "Min",
-                        "Sec",
-                      ][index]}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-          </section>
-        );
-
-      case "order":
-        return (
-          <section
-            key={section.id}
-            className="bg-gray-50 px-6 py-16"
-          >
-            <div className="mx-auto max-w-xl">
-              <div className="rounded-2xl bg-white p-6 shadow-lg sm:p-8">
-                <h2 className="text-center text-3xl font-bold">
-                  Order Now
-                </h2>
-
-                <p className="mt-2 text-center text-sm text-gray-500">
-                  Fill in your information and
-                  we will contact you.
-                </p>
-
-                <div className="mt-7 space-y-4">
-                  {[
-                    "Full name",
-                    "Phone number",
-                    "Wilaya",
-                    "Commune",
-                  ].map((field) => (
-                    <input
-                      key={field}
-                      placeholder={field}
-                      className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none"
-                    />
-                  ))}
-
-                  <button
-                    type="button"
-                    className="w-full rounded-xl py-3.5 text-sm font-bold text-white"
-                    style={{
-                      backgroundColor:
-                        settings.primaryColor,
-                    }}
-                  >
-                    {settings.buttonText}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-        );
-
-      default:
-        return null;
-    }
-  }
+  const appearance =
+    isOrderFormSelected
+      ? getAppearance(selected)
+      : DEFAULT_ORDER_FORM_APPEARANCE;
 
   return (
     <div className="h-screen overflow-hidden bg-gray-100">
-      {/* Top bar */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
         <div className="flex h-16 items-center justify-between px-5">
           <div>
@@ -553,34 +407,50 @@ export default function LandingPageBuilder() {
               <button
                 type="button"
                 onClick={() =>
-                  setPreviewMode("desktop")
+                  setPreviewMode(
+                    "desktop"
+                  )
                 }
                 className={`rounded-md p-2 ${
-                  previewMode === "desktop"
+                  previewMode ===
+                  "desktop"
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-400"
                 }`}
               >
-                <Monitor size={17} />
+                <Monitor
+                  size={17}
+                />
               </button>
 
               <button
                 type="button"
                 onClick={() =>
-                  setPreviewMode("mobile")
+                  setPreviewMode(
+                    "mobile"
+                  )
                 }
                 className={`rounded-md p-2 ${
-                  previewMode === "mobile"
+                  previewMode ===
+                  "mobile"
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-400"
                 }`}
               >
-                <Smartphone size={17} />
+                <Smartphone
+                  size={17}
+                />
               </button>
             </div>
 
             <button
               type="button"
+              onClick={() =>
+                selectedSection &&
+                scrollToSection(
+                  selectedSection
+                )
+              }
               className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               <Eye size={16} />
@@ -603,15 +473,15 @@ export default function LandingPageBuilder() {
       </header>
 
       <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-        {/* Left sidebar */}
-        <aside className="hidden w-72 shrink-0 overflow-y-auto landing-builder-scrollbar border-r border-gray-200 bg-white lg:block">
+        {/* LEFT SIDEBAR */}
+        <aside className="hidden w-72 shrink-0 overflow-y-auto border-r border-gray-200 bg-white landing-builder-scrollbar lg:block">
           <div className="border-b border-gray-200 p-5">
             <h2 className="text-sm font-semibold text-gray-900">
               Page structure
             </h2>
 
             <p className="mt-1 text-xs text-gray-500">
-              Arrange and manage your sections.
+              Drag sections to rearrange your landing page.
             </p>
           </div>
 
@@ -623,41 +493,69 @@ export default function LandingPageBuilder() {
                     section.type
                   ];
 
+                const isDragging =
+                  draggedSectionId ===
+                  section.id;
+
                 return (
                   <div
                     key={section.id}
-                    className={`rounded-xl border ${
-                      selectedSection ===
-                      section.id
-                        ? "border-indigo-300 bg-indigo-50"
-                        : "border-gray-200 bg-white"
+                    draggable
+                    onDragStart={(event) =>
+                      handleSectionDragStart(
+                        event,
+                        section.id
+                      )
+                    }
+                    onDragOver={(event) =>
+                      event.preventDefault()
+                    }
+                    onDrop={(event) =>
+                      handleSectionDrop(
+                        event,
+                        section.id
+                      )
+                    }
+                    onDragEnd={() =>
+                      setDraggedSectionId(
+                        null
+                      )
+                    }
+                    className={`rounded-xl border transition ${
+                      isDragging
+                        ? "scale-[0.98] border-indigo-400 opacity-50"
+                        : selectedSection ===
+                            section.id
+                          ? "border-indigo-300 bg-indigo-50"
+                          : "border-gray-200 bg-white"
                     }`}
                   >
                     <button
                       type="button"
                       onClick={() =>
-                        setSelectedSection(
+                        scrollToSection(
                           section.id
                         )
                       }
                       className="flex w-full items-center gap-2 px-3 py-3 text-left"
                     >
                       <GripVertical
-                        size={15}
-                        className="text-gray-400"
+                        size={16}
+                        className="shrink-0 cursor-grab text-gray-400"
                       />
 
                       <Icon
                         size={16}
-                        className="text-gray-500"
+                        className="shrink-0 text-gray-500"
                       />
 
                       <span className="flex-1 text-sm font-medium text-gray-800">
+                        {index + 1}.{" "}
                         {section.title}
                       </span>
 
                       <span
-                        className={`h-2 w-2 rounded-full ${
+                        className={`h-2 w-2 shrink-0 rounded-full ${
                           section.enabled
                             ? "bg-green-500"
                             : "bg-gray-300"
@@ -670,7 +568,9 @@ export default function LandingPageBuilder() {
                       <div className="flex border-t border-gray-200 px-2 py-2">
                         <button
                           type="button"
-                          disabled={index === 0}
+                          disabled={
+                            index === 0
+                          }
                           onClick={() =>
                             moveSection(
                               section.id,
@@ -688,7 +588,8 @@ export default function LandingPageBuilder() {
                           type="button"
                           disabled={
                             index ===
-                            sections.length - 1
+                            sections.length -
+                              1
                           }
                           onClick={() =>
                             moveSection(
@@ -741,7 +642,7 @@ export default function LandingPageBuilder() {
               type="button"
               onClick={() =>
                 setShowSectionLibrary(
-                  (current) => !current
+                  true
                 )
               }
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50"
@@ -752,25 +653,26 @@ export default function LandingPageBuilder() {
           </div>
         </aside>
 
-        {/* Preview */}
-        <main className="min-w-0 flex-1 overflow-y-auto landing-builder-scrollbar bg-[#eef0f3]">
-          <div className="flex min-h-full justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-10">
-            <div
-              className={`overflow-hidden bg-white shadow-2xl transition-all ${
-                previewMode === "mobile"
-                  ? "w-[390px] max-w-full"
-                  : "w-full max-w-6xl"
-              }`}
-            >
-              {sections.map(
-                renderPreviewSection
-              )}
-            </div>
-          </div>
-        </main>
+        {/* PREVIEW */}
+        <PreviewCanvas
+          previewMode={previewMode}
+        >
+          {sections.map(
+            (section) => (
+              <SectionRenderer
+                key={section.id}
+                section={section}
+                settings={settings}
+                formFields={
+                  formFields
+                }
+              />
+            )
+          )}
+        </PreviewCanvas>
 
-        {/* Right sidebar */}
-        <aside className="hidden w-56 shrink-0 overflow-y-auto landing-builder-scrollbar border-l border-gray-200 bg-white xl:block">
+        {/* RIGHT DESIGN PANEL */}
+        <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-gray-200 bg-white landing-builder-scrollbar xl:block">
           <div className="border-b border-gray-200 p-5">
             <div className="flex items-center gap-2">
               <Palette
@@ -790,34 +692,19 @@ export default function LandingPageBuilder() {
                 Primary color
               </label>
 
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={
-                    settings.primaryColor
-                  }
-                  onChange={(e) =>
-                    updateSetting(
-                      "primaryColor",
-                      e.target.value
-                    )
-                  }
-                  className="h-10 w-12 cursor-pointer rounded-lg border border-gray-300 p-1"
-                />
-
-                <input
-                  value={
-                    settings.primaryColor
-                  }
-                  onChange={(e) =>
-                    updateSetting(
-                      "primaryColor",
-                      e.target.value
-                    )
-                  }
-                  className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
-                />
-              </div>
+              <input
+                type="color"
+                value={
+                  settings.primaryColor
+                }
+                onChange={(event) =>
+                  updateSetting(
+                    "primaryColor",
+                    event.target.value
+                  )
+                }
+                className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
+              />
             </div>
 
             <div>
@@ -825,34 +712,19 @@ export default function LandingPageBuilder() {
                 Secondary color
               </label>
 
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  value={
-                    settings.secondaryColor
-                  }
-                  onChange={(e) =>
-                    updateSetting(
-                      "secondaryColor",
-                      e.target.value
-                    )
-                  }
-                  className="h-10 w-12 cursor-pointer rounded-lg border border-gray-300 p-1"
-                />
-
-                <input
-                  value={
-                    settings.secondaryColor
-                  }
-                  onChange={(e) =>
-                    updateSetting(
-                      "secondaryColor",
-                      e.target.value
-                    )
-                  }
-                  className="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono"
-                />
-              </div>
+              <input
+                type="color"
+                value={
+                  settings.secondaryColor
+                }
+                onChange={(event) =>
+                  updateSetting(
+                    "secondaryColor",
+                    event.target.value
+                  )
+                }
+                className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
+              />
             </div>
 
             <div>
@@ -865,10 +737,30 @@ export default function LandingPageBuilder() {
                 value={
                   settings.backgroundColor
                 }
-                onChange={(e) =>
+                onChange={(event) =>
                   updateSetting(
                     "backgroundColor",
-                    e.target.value
+                    event.target.value
+                  )
+                }
+                className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Text color
+              </label>
+
+              <input
+                type="color"
+                value={
+                  settings.textColor
+                }
+                onChange={(event) =>
+                  updateSetting(
+                    "textColor",
+                    event.target.value
                   )
                 }
                 className="h-10 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
@@ -881,11 +773,13 @@ export default function LandingPageBuilder() {
               </label>
 
               <input
-                value={settings.buttonText}
-                onChange={(e) =>
+                value={
+                  settings.buttonText
+                }
+                onChange={(event) =>
                   updateSetting(
                     "buttonText",
-                    e.target.value
+                    event.target.value
                   )
                 }
                 className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm"
@@ -898,11 +792,13 @@ export default function LandingPageBuilder() {
               </label>
 
               <select
-                value={settings.fontFamily}
-                onChange={(e) =>
+                value={
+                  settings.fontFamily
+                }
+                onChange={(event) =>
                   updateSetting(
                     "fontFamily",
-                    e.target.value
+                    event.target.value
                   )
                 }
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"
@@ -910,42 +806,493 @@ export default function LandingPageBuilder() {
                 <option value="Inter">
                   Inter
                 </option>
-
                 <option value="Arial">
                   Arial
                 </option>
-
                 <option value="Georgia">
                   Georgia
                 </option>
-
                 <option value="system-ui">
                   System
                 </option>
               </select>
             </div>
 
-            {selected && (
+            {/* ORDER FORM EDITOR */}
+            {isOrderFormSelected && (
               <div className="border-t border-gray-200 pt-5">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Selected section
-                </p>
+                <div className="flex items-center gap-2">
+                  <Settings2
+                    size={16}
+                    className="text-indigo-600"
+                  />
 
-                <p className="mt-2 text-sm font-semibold text-gray-900">
-                  {selected.title}
-                </p>
+                  <p className="text-sm font-semibold">
+                    Order Form
+                  </p>
+                </div>
 
-                <p className="mt-1 text-xs text-gray-500">
-                  Section customization will be
-                  expanded here.
-                </p>
+                <div className="mt-5 space-y-5">
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Form title
+                    </label>
+
+                    <input
+                      value={getStringSetting(
+                        selected,
+                        "title",
+                        "Order now"
+                      )}
+                      onChange={(event) =>
+                        updateSectionSetting(
+                          selected.id,
+                          "title",
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Form subtitle
+                    </label>
+
+                    <textarea
+                      value={getStringSetting(
+                        selected,
+                        "subtitle",
+                        "Fill in your information and we will contact you."
+                      )}
+                      onChange={(event) =>
+                        updateSectionSetting(
+                          selected.id,
+                          "subtitle",
+                          event.target.value
+                        )
+                      }
+                      className="min-h-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Button text
+                    </label>
+
+                    <input
+                      value={getStringSetting(
+                        selected,
+                        "buttonText",
+                        settings.buttonText
+                      )}
+                      onChange={(event) =>
+                        updateSectionSetting(
+                          selected.id,
+                          "buttonText",
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div className="border-t border-gray-100 pt-5">
+                    <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      Form colors
+                    </p>
+
+                    {(
+                      [
+                        [
+                          "sectionBackground",
+                          "Section background",
+                        ],
+                        [
+                          "formBackground",
+                          "Form background",
+                        ],
+                        [
+                          "textColor",
+                          "Text color",
+                        ],
+                        [
+                          "inputBackground",
+                          "Input background",
+                        ],
+                        [
+                          "inputTextColor",
+                          "Input text",
+                        ],
+                        [
+                          "inputBorderColor",
+                          "Input border",
+                        ],
+                        [
+                          "buttonBackground",
+                          "Button background",
+                        ],
+                        [
+                          "buttonTextColor",
+                          "Button text",
+                        ],
+                      ] as [
+                        keyof typeof DEFAULT_ORDER_FORM_APPEARANCE,
+                        string
+                      ][]
+                    ).map(
+                      ([
+                        key,
+                        label,
+                      ]) => (
+                        <div
+                          key={key}
+                          className="mb-4"
+                        >
+                          <label className="mb-2 block text-xs font-medium text-gray-600">
+                            {label}
+                          </label>
+
+                          <div className="flex gap-2">
+                            <input
+                              type="color"
+                              value={
+                                appearance[
+                                  key
+                                ]
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateOrderFormAppearance(
+                                  key,
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              className="h-9 w-11 cursor-pointer rounded-lg border border-gray-300 p-1"
+                            />
+
+                            <input
+                              value={
+                                appearance[
+                                  key
+                                ]
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateOrderFormAppearance(
+                                  key,
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              className="min-w-0 flex-1 rounded-lg border border-gray-300 px-2 py-1.5 font-mono text-xs"
+                            />
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+
+                  {/* FORM FIELDS */}
+                  <div className="border-t border-gray-100 pt-5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        Form fields
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={
+                          addFormField
+                        }
+                        className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                      >
+                        <Plus
+                          size={13}
+                        />
+                        Add
+                      </button>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {formFields.map(
+                        (
+                          field
+                        ) => (
+                          <div
+                            key={
+                              field.id
+                            }
+                            className="rounded-xl border border-gray-200 p-3"
+                          >
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  field.enabled
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateFormField(
+                                    field.id,
+                                    {
+                                      enabled:
+                                        event
+                                          .target
+                                          .checked,
+                                    }
+                                  )
+                                }
+                              />
+
+                              <input
+                                value={
+                                  field.label
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateFormField(
+                                    field.id,
+                                    {
+                                      label:
+                                        event
+                                          .target
+                                          .value,
+                                    }
+                                  )
+                                }
+                                className="min-w-0 flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-xs font-medium"
+                              />
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeFormField(
+                                    field.id
+                                  )
+                                }
+                                className="rounded-md p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                              >
+                                <Trash2
+                                  size={
+                                    14
+                                  }
+                                />
+                              </button>
+                            </div>
+
+                            <div className="mt-2">
+                              <select
+                                value={
+                                  field.type
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateFormField(
+                                    field.id,
+                                    {
+                                      type:
+                                        event
+                                          .target
+                                          .value as LandingFormFieldType,
+                                    }
+                                  )
+                                }
+                                className="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs"
+                              >
+                                {FORM_FIELD_TYPES.map(
+                                  (
+                                    type
+                                  ) => (
+                                    <option
+                                      key={
+                                        type.value
+                                      }
+                                      value={
+                                        type.value
+                                      }
+                                    >
+                                      {
+                                        type.label
+                                      }
+                                    </option>
+                                  )
+                                )}
+                              </select>
+                            </div>
+
+                            <input
+                              value={
+                                field.placeholder ??
+                                ""
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateFormField(
+                                  field.id,
+                                  {
+                                    placeholder:
+                                      event
+                                        .target
+                                        .value,
+                                  }
+                                )
+                              }
+                              placeholder="Placeholder"
+                              className="mt-2 w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                            />
+
+                            <label className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+                              <input
+                                type="checkbox"
+                                checked={
+                                  field.required
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateFormField(
+                                    field.id,
+                                    {
+                                      required:
+                                        event
+                                          .target
+                                          .checked,
+                                    }
+                                  )
+                                }
+                              />
+
+                              Required
+                            </label>
+
+                            <div className="mt-2 grid grid-cols-2 gap-2">
+                              <input
+                                type="number"
+                                min="0"
+                                value={
+                                  field.minLength ??
+                                  ""
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateFormField(
+                                    field.id,
+                                    {
+                                      minLength:
+                                        event
+                                          .target
+                                          .value ===
+                                        ""
+                                          ? undefined
+                                          : Number(
+                                              event
+                                                .target
+                                                .value
+                                            ),
+                                    }
+                                  )
+                                }
+                                placeholder="Min length"
+                                className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                              />
+
+                              <input
+                                type="number"
+                                min="0"
+                                value={
+                                  field.maxLength ??
+                                  ""
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateFormField(
+                                    field.id,
+                                    {
+                                      maxLength:
+                                        event
+                                          .target
+                                          .value ===
+                                        ""
+                                          ? undefined
+                                          : Number(
+                                              event
+                                                .target
+                                                .value
+                                            ),
+                                    }
+                                  )
+                                }
+                                placeholder="Max length"
+                                className="w-full rounded-md border border-gray-300 px-2 py-1.5 text-xs"
+                              />
+                            </div>
+
+                            <input
+                              value={
+                                field.pattern ??
+                                ""
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateFormField(
+                                  field.id,
+                                  {
+                                    pattern:
+                                      event
+                                        .target
+                                        .value ||
+                                      undefined,
+                                  }
+                                )
+                              }
+                              placeholder="Pattern / regex (optional)"
+                              className="mt-2 w-full rounded-md border border-gray-300 px-2 py-1.5 font-mono text-[11px]"
+                            />
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
+
+            {selected &&
+              !isOrderFormSelected && (
+                <div className="border-t border-gray-200 pt-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    Selected section
+                  </p>
+
+                  <p className="mt-2 text-sm font-semibold text-gray-900">
+                    {selected.title}
+                  </p>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Section-specific controls can be added here.
+                  </p>
+                </div>
+              )}
           </div>
         </aside>
       </div>
 
-      {/* Section library */}
+      {/* SECTION LIBRARY */}
       {showSectionLibrary && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
@@ -956,15 +1303,16 @@ export default function LandingPageBuilder() {
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">
-                  Choose a section to add to your
-                  landing page.
+                  Choose a section to add to your landing page.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={() =>
-                  setShowSectionLibrary(false)
+                  setShowSectionLibrary(
+                    false
+                  )
                 }
                 className="rounded-lg p-2 text-gray-400 hover:bg-gray-100"
               >
@@ -977,35 +1325,51 @@ export default function LandingPageBuilder() {
                 Object.keys(
                   SECTION_LABELS
                 ) as SectionType[]
-              ).map((type) => {
-                const Icon =
-                  SECTION_ICONS[type];
+              ).map(
+                (type) => {
+                  const Icon =
+                    SECTION_ICONS[
+                      type
+                    ];
 
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() =>
-                      addSection(type)
-                    }
-                    className="flex items-center gap-4 rounded-xl border border-gray-200 p-4 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-                      <Icon size={18} />
-                    </div>
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() =>
+                        addSection(
+                          type
+                        )
+                      }
+                      className="flex items-center gap-4 rounded-xl border border-gray-200 p-4 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                        <Icon
+                          size={18}
+                        />
+                      </div>
 
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {SECTION_LABELS[type]}
-                      </p>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {
+                            SECTION_LABELS[
+                              type
+                            ]
+                          }
+                        </p>
 
-                      <p className="mt-1 text-xs text-gray-500">
-                        Add {SECTION_LABELS[type].toLowerCase()} section
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
+                        <p className="mt-1 text-xs text-gray-500">
+                          Add{" "}
+                          {SECTION_LABELS[
+                            type
+                          ].toLowerCase()}{" "}
+                          section
+                        </p>
+                      </div>
+                    </button>
+                  );
+                }
+              )}
             </div>
           </div>
         </div>
@@ -1013,12 +1377,3 @@ export default function LandingPageBuilder() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-

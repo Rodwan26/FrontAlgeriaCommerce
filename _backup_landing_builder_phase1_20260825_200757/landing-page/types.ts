@@ -25,28 +25,18 @@ export type LandingTheme = {
   fontFamily: string;
 };
 
-export type LandingFormFieldType =
-  | "text"
-  | "phone"
-  | "email"
-  | "number"
-  | "textarea"
-  | "select"
-  | "address"
-  | "wilaya"
-  | "commune";
-
 export type LandingFormField = {
   id: string;
-  type: LandingFormFieldType;
+  type:
+    | "text"
+    | "phone"
+    | "email"
+    | "address"
+    | "wilaya"
+    | "commune";
   label: string;
-  placeholder?: string;
   required: boolean;
   enabled: boolean;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  options?: string[];
 };
 
 export type LandingPage = {

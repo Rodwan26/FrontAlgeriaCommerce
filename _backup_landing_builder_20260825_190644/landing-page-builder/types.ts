@@ -3,8 +3,9 @@
   LandingSection,
   LandingTheme,
   LandingFormField,
-  LandingFormFieldType,
   LandingPage,
+  PreviewMode,
+  SectionMoveDirection,
 } from "../../../lib/landing-page/types";
 
 import type {
@@ -12,8 +13,9 @@ import type {
   LandingSection,
   LandingTheme,
   LandingFormField,
-  LandingFormFieldType,
   LandingPage,
+  PreviewMode,
+  SectionMoveDirection,
 } from "../../../lib/landing-page/types";
 
 export type SectionType = LandingSectionType;
@@ -26,8 +28,3 @@ export type LandingSettings = {
   buttonText: string;
   fontFamily: string;
 };
-
-export type PreviewMode = "desktop" | "mobile";
-
-export type SectionMoveDirection = "up" | "down";
-

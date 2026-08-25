@@ -3,7 +3,6 @@
   LandingSection,
   LandingTheme,
   LandingFormField,
-  LandingFormFieldType,
   LandingPage,
 } from "../../../lib/landing-page/types";
 
@@ -12,7 +11,6 @@ import type {
   LandingSection,
   LandingTheme,
   LandingFormField,
-  LandingFormFieldType,
   LandingPage,
 } from "../../../lib/landing-page/types";
 
@@ -30,4 +28,3 @@ export type LandingSettings = {
 export type PreviewMode = "desktop" | "mobile";
 
 export type SectionMoveDirection = "up" | "down";
-
