@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { imageUrl } from "../../lib/images";
-import { ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 type Category = {
   id: number;
@@ -86,19 +86,7 @@ export default function ProductRow({
       {/* Actions */}
       <td className="px-6 py-4">
         <div className="flex gap-2">
-                    <button
-            type="button"
-            onClick={() =>
-              router.push(
-                `/admin/products/${product.id}/landing-page`
-              )
-            }
-            className="rounded-lg p-2 text-purple-600 transition hover:bg-purple-50"
-            title="Landing Page"
-          >
-            <ExternalLink size={18} />
-          </button>
-<button
+          <button
   type="button"
   onClick={() =>
     router.push(`/admin/products/edit/${product.id}`)
@@ -121,5 +109,4 @@ export default function ProductRow({
     </tr>
   );
 }
-
 

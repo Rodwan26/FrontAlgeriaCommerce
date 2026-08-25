@@ -1,5 +1,5 @@
-﻿import LandingPageBuilder from "../../../../components/admin/landing-page-builder/LandingPageBuilder";
+﻿import { redirect } from "next/navigation";
 
 export default function NewLandingPagePage() {
-  return <LandingPageBuilder />;
+  redirect("/admin/products");
 }

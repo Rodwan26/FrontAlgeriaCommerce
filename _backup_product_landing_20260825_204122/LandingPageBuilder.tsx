@@ -177,7 +177,7 @@ function getStringSetting(
     : fallback;
 }
 
-export default function LandingPageBuilder({ productId }: { productId: string }) {
+export default function LandingPageBuilder() {
   const {
     sections,
     selected,
@@ -1377,4 +1377,3 @@ export default function LandingPageBuilder({ productId }: { productId: string })
     </div>
   );
 }
-
