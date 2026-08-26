@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import {
+  useRef,
   useState,
 } from "react";
 
@@ -394,8 +395,134 @@ export default function LandingPageBuilder({ productId }: { productId: string })
   const [mobilePanel, setMobilePanel] =
     useState<"sections" | "design" | "edit" | null>(null);
 
+  // Mobile bottom-sheet drag system.
+  const mobileSheetRef = useRef<HTMLDivElement | null>(null);
+  const mobileSheetStartY = useRef(0);
+  const mobileSheetDeltaY = useRef(0);
+  const mobileSheetDragging = useRef(false);
+
+  function shouldIgnoreMobileSheetDrag(
+    target: EventTarget | null
+  ) {
+    if (!(target instanceof HTMLElement)) {
+      return false;
+    }
+
+    return Boolean(
+      target.closest(
+        "button, input, textarea, select, option, a"
+      )
+    );
+  }
+
+  function handleMobileSheetPointerDown(
+    event: React.PointerEvent<HTMLDivElement>
+  ) {
+    if (event.pointerType === "mouse" && event.button !== 0) {
+      return;
+    }
+
+    if (shouldIgnoreMobileSheetDrag(event.target)) {
+      return;
+    }
+
+    mobileSheetStartY.current = event.clientY;
+    mobileSheetDeltaY.current = 0;
+    mobileSheetDragging.current = true;
+
+    event.currentTarget.setPointerCapture(
+      event.pointerId
+    );
+
+    const sheet = mobileSheetRef.current;
+
+    if (sheet) {
+      sheet.style.transition = "none";
+    }
+  }
+
+  function handleMobileSheetPointerMove(
+    event: React.PointerEvent<HTMLDivElement>
+  ) {
+    if (!mobileSheetDragging.current) {
+      return;
+    }
+
+    const delta =
+      event.clientY -
+      mobileSheetStartY.current;
+
+    mobileSheetDeltaY.current = delta;
+
+    const sheet = mobileSheetRef.current;
+
+    if (!sheet) {
+      return;
+    }
+
+    /*
+     * Allow the sheet to move both directions.
+     * The resistance keeps the interaction natural
+     * when the user pulls it beyond its limits.
+     */
+    const limitedDelta =
+      delta < 0
+        ? delta * 0.65
+        : delta;
+
+    sheet.style.transform =
+      `translateY(${limitedDelta}px)`;
+  }
+
+  function handleMobileSheetPointerEnd() {
+    if (!mobileSheetDragging.current) {
+      return;
+    }
+
+    mobileSheetDragging.current = false;
+
+    const sheet = mobileSheetRef.current;
+
+    if (!sheet) {
+      return;
+    }
+
+    const delta =
+      mobileSheetDeltaY.current;
+
+    sheet.style.transition =
+      "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+    if (delta > 140) {
+      sheet.style.transform =
+        "translateY(100%)";
+
+      window.setTimeout(() => {
+        setMobilePanel(null);
+
+        if (mobileSheetRef.current) {
+          mobileSheetRef.current.style.transform = "";
+          mobileSheetRef.current.style.transition = "";
+        }
+      }, 220);
+
+      return;
+    }
+
+    sheet.style.transform =
+      "translateY(0)";
+  }
+
   function closeMobilePanel() {
     setMobilePanel(null);
+  }
+
+  function toggleMobilePanel(
+    panel: "sections" | "design" | "edit"
+  ) {
+    setMobilePanel((current) =>
+      current === panel ? null : panel
+    );
   }
 
   function openMobileSection(sectionId: string) {
@@ -502,13 +629,8 @@ export default function LandingPageBuilder({ productId }: { productId: string })
       <div className="flex border-b border-gray-200 bg-white lg:hidden">
         <button
           type="button"
-          onClick={() =>
-            setMobilePanel(
-              mobilePanel === "sections"
-                ? null
-                : "sections"
-            )
-          }
+          onClick={() => toggleMobilePanel("sections")}
+
           className={`flex-1 px-3 py-3 text-sm font-semibold transition ${
             mobilePanel === "sections"
               ? "bg-indigo-50 text-indigo-700"
@@ -520,13 +642,8 @@ export default function LandingPageBuilder({ productId }: { productId: string })
 
         <button
           type="button"
-          onClick={() =>
-            setMobilePanel(
-              mobilePanel === "design"
-                ? null
-                : "design"
-            )
-          }
+          onClick={() => toggleMobilePanel("design")}
+
           className={`flex-1 border-l border-gray-200 px-3 py-3 text-sm font-semibold transition ${
             mobilePanel === "design"
               ? "bg-indigo-50 text-indigo-700"
@@ -538,13 +655,8 @@ export default function LandingPageBuilder({ productId }: { productId: string })
 
         <button
           type="button"
-          onClick={() =>
-            setMobilePanel(
-              mobilePanel === "edit"
-                ? null
-                : "edit"
-            )
-          }
+          onClick={() => toggleMobilePanel("edit")}
+
           className={`flex-1 border-l border-gray-200 px-3 py-3 text-sm font-semibold transition ${
             mobilePanel === "edit"
               ? "bg-indigo-50 text-indigo-700"
@@ -735,310 +847,6 @@ export default function LandingPageBuilder({ productId }: { productId: string })
           </div>
         </aside>
 
-        {/* MOBILE SECTIONS PANEL */}
-        {mobilePanel === "sections" && (
-          <div className="absolute inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white shadow-2xl lg:hidden">
-            <div className="sticky top-0 border-b border-gray-200 bg-white px-4 py-3">
-              <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-sm font-semibold text-gray-900">
-                    Page structure
-                  </h2>
-
-                  <p className="mt-0.5 text-xs text-gray-500">
-                    Rearrange your landing page sections.
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setMobilePanel(null)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2 p-3">
-              {sections.map((section, index) => {
-                const Icon =
-                  SECTION_ICONS[section.type];
-
-                return (
-                  <div
-                    key={section.id}
-                    className={`rounded-xl border transition ${
-                      selectedSection === section.id
-                        ? "border-indigo-300 bg-indigo-50"
-                        : "border-gray-200 bg-white"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        scrollToSection(section.id)
-                      }
-                      className="flex w-full items-center gap-2 px-3 py-3 text-left"
-                    >
-                      <Icon
-                        size={16}
-                        className="shrink-0 text-gray-500"
-                      />
-
-                      <span className="flex-1 text-sm font-medium text-gray-800">
-                        {index + 1}. {section.title}
-                      </span>
-
-                      <span
-                        className={`h-2 w-2 shrink-0 rounded-full ${
-                          section.enabled
-                            ? "bg-green-500"
-                            : "bg-gray-300"
-                        }`}
-                      />
-                    </button>
-
-                    {selectedSection === section.id && (
-                      <div className="flex border-t border-gray-200 px-2 py-2">
-                        <button
-                          type="button"
-                          disabled={index === 0}
-                          onClick={() =>
-                            moveSection(section.id, "up")
-                          }
-                          className="rounded p-1.5 text-gray-500 hover:bg-white disabled:opacity-30"
-                        >
-                          <ChevronUp size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={
-                            index === sections.length - 1
-                          }
-                          onClick={() =>
-                            moveSection(section.id, "down")
-                          }
-                          className="rounded p-1.5 text-gray-500 hover:bg-white disabled:opacity-30"
-                        >
-                          <ChevronDown size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            toggleSection(section.id)
-                          }
-                          className="ml-auto rounded px-2 py-1 text-xs font-medium text-gray-500 hover:bg-white"
-                        >
-                          {section.enabled ? "Hide" : "Show"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeSection(section.id)
-                          }
-                          className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-
-              <button
-                type="button"
-                onClick={() => setShowSectionLibrary(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 px-4 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-              >
-                <Plus size={16} />
-                Add section
-              </button>
-            </div>
-          </div>
-        )}
-        {/* MOBILE DESIGN PANEL */}
-        {mobilePanel === "design" && (
-          <div className="absolute inset-x-0 bottom-0 z-40 max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-gray-200 bg-white shadow-2xl lg:hidden">
-            <div className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-3">
-              <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-gray-300" />
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Palette
-                    size={17}
-                    className="text-gray-500"
-                  />
-
-                  <div>
-                    <h2 className="text-sm font-semibold text-gray-900">
-                      Design
-                    </h2>
-
-                    <p className="text-xs text-gray-500">
-                      Customize your landing page.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setMobilePanel(null)}
-                  className="rounded-lg px-3 py-1.5 text-xs font-semibold text-gray-500 hover:bg-gray-100"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-5 p-4 text-gray-900">
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Primary color
-                </label>
-
-                <input
-                  type="color"
-                  value={settings.primaryColor}
-                  onChange={(event) =>
-                    updateSetting(
-                      "primaryColor",
-                      event.target.value
-                    )
-                  }
-                  className="h-11 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Secondary color
-                </label>
-
-                <input
-                  type="color"
-                  value={settings.secondaryColor}
-                  onChange={(event) =>
-                    updateSetting(
-                      "secondaryColor",
-                      event.target.value
-                    )
-                  }
-                  className="h-11 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Background
-                </label>
-
-                <input
-                  type="color"
-                  value={settings.backgroundColor}
-                  onChange={(event) =>
-                    updateSetting(
-                      "backgroundColor",
-                      event.target.value
-                    )
-                  }
-                  className="h-11 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Text color
-                </label>
-
-                <input
-                  type="color"
-                  value={settings.textColor}
-                  onChange={(event) =>
-                    updateSetting(
-                      "textColor",
-                      event.target.value
-                    )
-                  }
-                  className="h-11 w-full cursor-pointer rounded-lg border border-gray-300 p-1"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Button text
-                </label>
-
-                <input
-                  value={settings.buttonText}
-                  onChange={(event) =>
-                    updateSetting(
-                      "buttonText",
-                      event.target.value
-                    )
-                  }
-                  className="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Font
-                </label>
-
-                <select
-                  value={settings.fontFamily}
-                  onChange={(event) =>
-                    updateSetting(
-                      "fontFamily",
-                      event.target.value
-                    )
-                  }
-                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-sm"
-                >
-                  <option value="Inter">
-                    Inter
-                  </option>
-
-                  <option value="Arial">
-                    Arial
-                  </option>
-
-                  <option value="Georgia">
-                    Georgia
-                  </option>
-
-                  <option value="system-ui">
-                    System
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* PREVIEW */}
-        <PreviewCanvas
-          previewMode={previewMode}
-        >
-          {sections.map(
-            (section) => (
-              <SectionRenderer
-                key={section.id}
-                section={section}
-                settings={settings}
-                formFields={
-                  formFields
-                }
-              />
-            )
-          )}
-        </PreviewCanvas>
 
         {/* RIGHT DESIGN PANEL */}
         <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-gray-200 bg-white landing-builder-scrollbar xl:block">
@@ -1661,71 +1469,17 @@ export default function LandingPageBuilder({ productId }: { productId: string })
         </aside>
       </div>
 
-      {/* MOBILE BUILDER TOOLBAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-[70] border-t border-gray-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden">
-        <div className="grid grid-cols-3">
-          <button
-            type="button"
-            onClick={() =>
-              setMobilePanel(
-                mobilePanel === "sections"
-                  ? null
-                  : "sections"
-              )
-            }
-            className={`flex flex-col items-center justify-center gap-1 px-3 py-3 text-xs font-semibold ${
-              mobilePanel === "sections"
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-gray-600"
-            }`}
-          >
-            <GripVertical size={18} />
-            Sections
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              setMobilePanel(
-                mobilePanel === "design"
-                  ? null
-                  : "design"
-              )
-            }
-            className={`flex flex-col items-center justify-center gap-1 border-x border-gray-200 px-3 py-3 text-xs font-semibold ${
-              mobilePanel === "design"
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-gray-600"
-            }`}
-          >
-            <Palette size={18} />
-            Design
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              setMobilePanel(
-                mobilePanel === "edit"
-                  ? null
-                  : "edit"
-              )
-            }
-            className={`flex flex-col items-center justify-center gap-1 px-3 py-3 text-xs font-semibold ${
-              mobilePanel === "edit"
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-gray-600"
-            }`}
-          >
-            <Settings2 size={18} />
-            Edit
-          </button>
-        </div>
-      </div>
 
       {/* MOBILE BUILDER SHEET */}
       {mobilePanel && (
-        <div className="fixed inset-x-0 bottom-0 z-[65] max-h-[78vh] overflow-hidden rounded-t-3xl border-t border-gray-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.18)] lg:hidden">
+        <div
+          ref={mobileSheetRef}
+          onPointerDown={handleMobileSheetPointerDown}
+          onPointerMove={handleMobileSheetPointerMove}
+          onPointerUp={handleMobileSheetPointerEnd}
+          onPointerCancel={handleMobileSheetPointerEnd}
+          className="fixed inset-x-0 bottom-0 z-[65] max-h-[78vh] overflow-hidden rounded-t-3xl border-t border-gray-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.18)] lg:hidden"
+        >
           <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
             <div>
               <h2 className="text-base font-bold text-gray-900">
@@ -2389,6 +2143,9 @@ export default function LandingPageBuilder({ productId }: { productId: string })
     </div>
   );
 }
+
+
+
 
 
 
