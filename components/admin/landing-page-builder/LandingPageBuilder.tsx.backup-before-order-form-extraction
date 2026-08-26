@@ -152,55 +152,6 @@ export default function LandingPageBuilder({ productId }: { productId: string })
     );
   }
 
-
-const DEFAULT_ORDER_FORM_APPEARANCE = {
-  sectionBackground: "#F9FAFB",
-  formBackground: "#FFFFFF",
-  textColor: "#111827",
-  inputBackground: "#FFFFFF",
-  inputTextColor: "#111827",
-  inputBorderColor: "#D1D5DB",
-  buttonBackground: "#EF2028",
-  buttonTextColor: "#FFFFFF",
-};
-
-function getAppearance(
-  section: LandingSection | null
-) {
-  if (!section) {
-    return DEFAULT_ORDER_FORM_APPEARANCE;
-  }
-
-  const raw =
-    section.settings.appearance;
-
-  if (
-    !raw ||
-    typeof raw !== "object"
-  ) {
-    return DEFAULT_ORDER_FORM_APPEARANCE;
-  }
-
-  return {
-    ...DEFAULT_ORDER_FORM_APPEARANCE,
-    ...(raw as Partial<
-      typeof DEFAULT_ORDER_FORM_APPEARANCE
-    >),
-  };
-}
-
-function getStringSetting(
-  section: LandingSection,
-  key: string,
-  fallback: string
-) {
-  const value =
-    section.settings[key];
-
-  return typeof value === "string"
-    ? value
-    : fallback;
-}
   function updateOrderFormAppearance(
     key: keyof typeof DEFAULT_ORDER_FORM_APPEARANCE,
     value: string
@@ -1466,7 +1417,6 @@ function getStringSetting(
     </div>
   );
 }
-
 
 
 
