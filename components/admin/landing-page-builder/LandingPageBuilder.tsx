@@ -1474,11 +1474,11 @@ export default function LandingPageBuilder({ productId }: { productId: string })
       {mobilePanel && (
         <div
           ref={mobileSheetRef}
-          onPointerDown={handleMobileSheetPointerDown}
-          onPointerMove={handleMobileSheetPointerMove}
-          onPointerUp={handleMobileSheetPointerEnd}
-          onPointerCancel={handleMobileSheetPointerEnd}
-          className="fixed inset-x-0 bottom-0 z-[65] max-h-[78vh] overflow-hidden rounded-t-3xl border-t border-gray-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.18)] lg:hidden"
+          className={
+            mobilePanel === "edit"
+              ? "fixed inset-0 z-[65] flex flex-col overflow-hidden bg-white lg:hidden"
+              : "fixed inset-x-0 bottom-0 z-[65] max-h-[78vh] overflow-hidden rounded-t-3xl border-t border-gray-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.18)] lg:hidden"
+          }
         >
           <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
             <div>
@@ -1510,7 +1510,18 @@ export default function LandingPageBuilder({ productId }: { productId: string })
             </button>
           </div>
 
-          <div className="custom-scrollbar max-h-[calc(78vh-76px)] overflow-y-auto overscroll-contain p-4 pb-8">
+          <div
+            className={
+              mobilePanel === "edit"
+                ? "landing-builder-scrollbar h-[calc(100dvh-112px)] overflow-y-auto overscroll-contain p-4 pb-10"
+                : "landing-builder-scrollbar max-h-[calc(78vh-76px)] overflow-y-auto overscroll-contain p-4 pb-8"
+            }
+            style={{
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "thin",
+              scrollbarColor: `${settings.primaryColor} transparent`,
+            }}
+          >
             {/* MOBILE SECTIONS */}
             {mobilePanel === "sections" && (
               <div className="space-y-2">
@@ -2143,6 +2154,8 @@ export default function LandingPageBuilder({ productId }: { productId: string })
     </div>
   );
 }
+
+
 
 
 
