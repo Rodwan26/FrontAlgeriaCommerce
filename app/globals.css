@@ -549,3 +549,37 @@ h6 {
   background: transparent;
 }
 
+/* =========================================================
+   ADMIN SCOPE — ROOT FIX
+   The global dark body theme (color #eeeeee on #101112)
+   leaks light text into the light admin pages, making any
+   control without explicit colors invisible on white.
+   This scope forces a light theme on every admin control so
+   the problem can never recur per-component.
+   ========================================================= */
+
+.admin-app {
+  color: #111827;
+}
+
+.admin-app input,
+.admin-app select,
+.admin-app textarea {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  caret-color: #111827 !important;
+  background-color: #ffffff !important;
+}
+
+.admin-app input::placeholder,
+.admin-app textarea::placeholder {
+  color: #9ca3af !important;
+  -webkit-text-fill-color: #9ca3af !important;
+  opacity: 1;
+}
+
+.admin-app select option {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+

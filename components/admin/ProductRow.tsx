@@ -1,14 +1,17 @@
 ﻿"use client";
 
 import { imageUrl } from "../../lib/images";
-import { LayoutTemplate, Pencil, Trash2 } from "lucide-react";
+import { Copy, LayoutTemplate, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
 type Category = {
   id: number;
   name: string;
 };
 
-type Product = {
+export type ProductStatus = "active" | "draft";
+
+export type Product = {
   id: number;
   name: string;
   description: string;
@@ -16,18 +19,30 @@ type Product = {
   image: string | null;
   category_id: number | null;
   category: Category | null;
+  stock?: number;
+  status?: ProductStatus;
 };
+
 type Props = {
   product: Product;
   onDelete: (productId: number) => void;
   deleting: boolean;
+  onToggleStatus: (productId: number) => void;
+  onDuplicate: (productId: number) => void;
 };
+
 export default function ProductRow({
   product,
   onDelete,
   deleting,
-}: Props)  {
+  onToggleStatus,
+  onDuplicate,
+}: Props) {
   const router = useRouter();
+  const stock = product.stock ?? null;
+  const lowStock = stock !== null && stock <= 5;
+  const status = product.status ?? "active";
+
   return (
     <tr className="border-b hover:bg-gray-50">
       {/* Image */}
@@ -49,9 +64,13 @@ export default function ProductRow({
 
       {/* Product */}
       <td className="px-6 py-4">
-        <p className="font-semibold text-gray-900">
+        <button
+          type="button"
+          onClick={() => router.push(`/admin/products/${product.id}`)}
+          className="text-right font-semibold text-gray-900 hover:text-indigo-600"
+        >
           {product.name}
-        </p>
+        </button>
 
         <p className="mt-1 line-clamp-1 text-sm text-gray-500">
           {product.description}
@@ -76,50 +95,84 @@ export default function ProductRow({
         {product.price} DA
       </td>
 
+      {/* Stock */}
+      <td className="px-6 py-4">
+        {stock === null ? (
+          <span className="text-sm text-gray-400">—</span>
+        ) : (
+          <span
+            className={`rounded-full px-3 py-1 text-sm font-medium ${
+              lowStock
+                ? "bg-red-100 text-red-700"
+                : "bg-green-100 text-green-700"
+            }`}
+          >
+            {stock}
+            {lowStock ? (
+              <span className="mr-1">· Low stock</span>
+            ) : null}
+          </span>
+        )}
+      </td>
+
       {/* Status */}
       <td className="px-6 py-4">
-        <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
-          Active
-        </span>
+        <button
+          type="button"
+          onClick={() => onToggleStatus(product.id)}
+          title={status === "active" ? "Switch to draft" : "Publish product"}
+          className={`group flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition ${
+            status === "active"
+              ? "bg-green-100 text-green-700"
+              : "bg-gray-100 text-gray-600"
+          }`}
+        >
+          <span className="h-2 w-2 rounded-full bg-current" />
+          {status === "active" ? "Active" : "Draft"}
+        </button>
       </td>
 
       {/* Actions */}
       <td className="px-6 py-4">
         <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.push(`/admin/products/${product.id}/landing`)}
+            className="rounded-lg p-2 text-green-600 transition hover:bg-green-50"
+            title="صفحة الهبوط"
+          >
+            <LayoutTemplate size={18} />
+          </button>
 
-<button
-  type="button"
-  onClick={() =>
-    router.push(`/admin/products/${product.id}/landing`)
-  }
-  className="rounded-lg p-2 text-green-600 transition hover:bg-green-50"
-  title="صفحة الهبوط"
->
-  <LayoutTemplate size={18} />
-</button>
+          <button
+            type="button"
+            onClick={() => router.push(`/admin/products/edit/${product.id}`)}
+            className="rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50"
+            title="تعديل المنتج"
+          >
+            <Pencil size={18} />
+          </button>
 
-<button
-  type="button"
-  onClick={() =>
-    router.push(`/admin/products/edit/${product.id}`)
-  }
-  className="rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50"
->
-  <Pencil size={18} />
-</button>
+          <button
+            type="button"
+            onClick={() => onDuplicate(product.id)}
+            className="rounded-lg p-2 text-sky-600 transition hover:bg-sky-50"
+            title="نسخ المنتج"
+          >
+            <Copy size={18} />
+          </button>
 
-         <button
-  type="button"
-  onClick={() => onDelete(product.id)}
-  disabled={deleting}
-  className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
->
-  <Trash2 size={18} />
-</button>
+          <button
+            type="button"
+            onClick={() => onDelete(product.id)}
+            disabled={deleting}
+            className="rounded-lg p-2 text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+            title="حذف المنتج"
+          >
+            <Trash2 size={18} />
+          </button>
         </div>
       </td>
     </tr>
   );
 }
-
-

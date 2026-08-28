@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Settings,
   Store,
+  Truck,
   X,
 } from "lucide-react";
 import { useRef } from "react";
@@ -38,10 +39,15 @@ const links = [
     href: "/admin/orders",
     icon: ShoppingCart,
   },
-  {
+{
     title: "Categories",
     href: "/admin/categories",
     icon: Package,
+  },
+  {
+    title: "Shipping",
+    href: "/admin/shipping",
+    icon: Truck,
   },
   {
     title: "Settings",

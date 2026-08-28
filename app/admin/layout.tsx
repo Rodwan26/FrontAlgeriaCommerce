@@ -17,7 +17,7 @@ export default function AdminLayout({
     useState(220);
 
   return (
-    <div className="flex min-h-screen overflow-hidden bg-gray-50">
+    <div className="admin-app flex min-h-screen overflow-hidden bg-gray-50">
       <Sidebar
         isOpen={sidebarOpen}
         width={sidebarWidth}

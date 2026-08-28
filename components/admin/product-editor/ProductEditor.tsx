@@ -137,14 +137,24 @@ function generateVariants(
 
 export default function ProductEditor({
   productId,
+  cloneId,
 }: {
   productId?: number;
+  cloneId?: number;
 }) {
   const demoProduct = productId
     ? getDemoProduct(productId)
-    : undefined;
+    : cloneId
+      ? getDemoProduct(cloneId)
+      : undefined;
 
   const isEdit = Boolean(productId);
+  const isClone = Boolean(cloneId);
+  const title = isEdit
+    ? "Edit product"
+    : isClone
+      ? "Duplicate product"
+      : "Add product";
 
   const [name, setName] = useState(
     demoProduct?.name ?? ""
@@ -239,7 +249,7 @@ export default function ProductEditor({
     );
   }
 
-  if (isEdit && !demoProduct) {
+  if ((isEdit || isClone) && !demoProduct) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
@@ -248,7 +258,7 @@ export default function ProductEditor({
           </h2>
 
           <p className="mt-2 text-sm text-gray-500">
-            تعذّر العثور على المنتج رقم {productId} في
+            تعذّر العثور على المنتج رقم {productId || cloneId} في
             البيانات التجريبية.
           </p>
 
@@ -269,7 +279,8 @@ export default function ProductEditor({
   return (
     <div className="min-h-screen bg-gray-50">
       <ProductEditorHeader
-        title={isEdit ? "Edit product" : "Add product"}
+        title={title}
+        productId={productId}
         onSave={handleSave}
       />
 

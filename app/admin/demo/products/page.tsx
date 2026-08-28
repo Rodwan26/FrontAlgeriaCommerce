@@ -10,9 +10,10 @@ export default function DemoProductsPage() {
           Landing Page Feature Preview
         </p>
 
-        <p className="mt-1 text-sm text-purple-600">
-          This is a frontend demonstration of the merchant product
-          experience. The Landing Page button is the only active action.
+<p className="mt-1 text-sm text-purple-600">
+          Frontend demonstration of the merchant product experience —
+          view, edit, duplicate and landing page are all demo actions
+          without a backend.
         </p>
       </div>
 

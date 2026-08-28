@@ -1,87 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import ProductRow from "./ProductRow";
+import type { Product } from "./ProductRow";
 
-type Category = {
-  id: number;
-  name: string;
+export type { Product } from "./ProductRow";
+
+type Props = {
+  products: Product[];
+  onDelete: (productId: number) => void;
+  deletingId: number | null;
+  onToggleStatus: (productId: number) => void;
+  onDuplicate: (productId: number) => void;
 };
 
-type Product = {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string | null;
-  category_id: number | null;
-  category: Category | null;
-};
-
-export default function ProductsTable() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-
-  async function loadProducts() {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products`
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to load products");
-      }
-
-      const data = await res.json();
-
-      setProducts(data);
-    } catch (error) {
-      console.error("Failed to load products:", error);
-    }
-  }
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  async function deleteProduct(productId: number) {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setDeletingId(productId);
-
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!res.ok) {
-        throw new Error("Failed to delete product");
-      }
-
-      setProducts((currentProducts) =>
-        currentProducts.filter(
-          (product) => product.id !== productId
-        )
-      );
-    } catch (error) {
-      console.error("Failed to delete product:", error);
-      alert("Failed to delete product");
-    } finally {
-      setDeletingId(null);
-    }
-  }
-
+export default function ProductsTable({
+  products,
+  onDelete,
+  deletingId,
+  onToggleStatus,
+  onDuplicate,
+}: Props) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
       <table className="w-full">
         <thead>
           <tr className="border-b text-left text-gray-600">
@@ -89,23 +29,33 @@ export default function ProductsTable() {
             <th className="px-6 py-4">Product</th>
             <th className="px-6 py-4">Category</th>
             <th className="px-6 py-4">Price</th>
+            <th className="px-6 py-4">Stock</th>
             <th className="px-6 py-4">Status</th>
             <th className="px-6 py-4">Actions</th>
           </tr>
         </thead>
 
         <tbody>
-          {products.map((product) => (
-            <ProductRow
-              key={product.id}
-              product={product}
-              onDelete={deleteProduct}
-              deleting={deletingId === product.id}
-            />
-          ))}
+          {products.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
+                No matching products
+              </td>
+            </tr>
+          ) : (
+            products.map((product) => (
+              <ProductRow
+                key={product.id}
+                product={product}
+                onDelete={onDelete}
+                deleting={deletingId === product.id}
+                onToggleStatus={onToggleStatus}
+                onDuplicate={onDuplicate}
+              />
+            ))
+          )}
         </tbody>
       </table>
     </div>
   );
 }
-
