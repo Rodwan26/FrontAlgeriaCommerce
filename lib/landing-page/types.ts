@@ -1,65 +1,177 @@
-﻿export type LandingSectionType =
+export type SectionType =
   | "hero"
-  | "product"
   | "features"
   | "gallery"
   | "testimonials"
   | "faq"
-  | "countdown"
-  | "order-form";
+  | "order-form"
+  | "footer";
 
-export type LandingSection = {
+export type LandingColors = {
+  bg: string;
+  surface: string;
+  primary: string;
+  primaryHover: string;
+  text: string;
+  mutedText: string;
+  border: string;
+};
+
+export const DEFAULT_COLORS: LandingColors = {
+  bg: "#111315",
+  surface: "#181818",
+  primary: "#ef2028",
+  primaryHover: "#ff3038",
+  text: "#ffffff",
+  mutedText: "#a1a1aa",
+  border: "#292a2b",
+};
+
+type BaseSection = {
   id: string;
-  type: LandingSectionType;
-  title: string;
+  type: SectionType;
   enabled: boolean;
-  settings: Record<string, unknown>;
+  colors: LandingColors;
 };
 
-export type LandingTheme = {
-  primaryColor: string;
-  secondaryColor: string;
-  backgroundColor: string;
-  textColor: string;
-  buttonTextColor: string;
-  fontFamily: string;
+export type HeroSlide = {
+  image: string;
+  title: string;
+  description: string;
 };
 
-export type LandingFormFieldType =
-  | "text"
-  | "phone"
-  | "email"
-  | "number"
-  | "textarea"
-  | "select"
-  | "address"
-  | "wilaya"
-  | "commune";
+export type HeroSection = BaseSection & {
+  type: "hero";
+  brand: string;
+  title: string;
+  highlightedTitle: string;
+  description: string;
+  price: number;
+  currency: string;
+  buttonText: string;
+  slides: HeroSlide[];
+};
 
-export type LandingFormField = {
+export type FeatureItem = {
   id: string;
-  type: LandingFormFieldType;
+  title: string;
+  description: string;
+  image: string;
+};
+
+export type FeaturesSection = BaseSection & {
+  type: "features";
+  title: string;
+  subtitle: string;
+  items: FeatureItem[];
+};
+
+export type GalleryItem = {
+  id: string;
+  image: string;
+  caption: string;
+};
+
+export type GallerySection = BaseSection & {
+  type: "gallery";
+  title: string;
+  items: GalleryItem[];
+};
+
+export type TestimonialItem = {
+  id: string;
+  name: string;
+  text: string;
+  rating: number;
+};
+
+export type TestimonialsSection = BaseSection & {
+  type: "testimonials";
+  title: string;
+  items: TestimonialItem[];
+};
+
+export type FaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+};
+
+export type FaqSection = BaseSection & {
+  type: "faq";
+  title: string;
+  items: FaqItem[];
+};
+
+export type OrderFieldId =
+  | "name"
+  | "phone"
+  | "wilaya"
+  | "commune"
+  | "delivery"
+  | "quantity"
+  | "address";
+
+export const ORDER_FIELD_LABELS: Record<OrderFieldId, string> = {
+  name: "الاسم",
+  phone: "رقم الهاتف",
+  wilaya: "الولاية",
+  commune: "البلدية",
+  delivery: "نوع التوصيل",
+  quantity: "الكمية",
+  address: "العنوان المفصل",
+};
+
+export type OrderField = {
+  id: OrderFieldId;
   label: string;
-  placeholder?: string;
   required: boolean;
   enabled: boolean;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: string;
-  options?: string[];
 };
+
+export type OrderFormSection = BaseSection & {
+  type: "order-form";
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  price: number;
+  currency: string;
+  delivery: {
+    homeLabel: string;
+    homePrice: number;
+    officeLabel: string;
+    officePrice: number;
+  };
+  fields: OrderField[];
+};
+
+export type FooterBenefit = {
+  id: string;
+  title: string;
+  description: string;
+};
+
+export type FooterSection = BaseSection & {
+  type: "footer";
+  copyright: string;
+  benefits: FooterBenefit[];
+};
+
+export type LandingSection =
+  | HeroSection
+  | FeaturesSection
+  | GallerySection
+  | TestimonialsSection
+  | FaqSection
+  | OrderFormSection
+  | FooterSection;
 
 export type LandingPage = {
   id: string;
-  productId: string;
-  title: string;
+  productId: number;
   slug: string;
-  status: "draft" | "published";
-  theme: LandingTheme;
+  title: string;
+  brand: string;
+  headerColors: LandingColors;
   sections: LandingSection[];
-  formFields: LandingFormField[];
 };
-
-export type PreviewMode = "desktop" | "mobile";
-
-export type SectionMoveDirection = "up" | "down";

@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 
 type ProductEditorHeaderProps = {
   onSave?: () => void;
+  title?: string;
 };
 
 export default function ProductEditorHeader({
   onSave,
+  title = "Add product",
 }: ProductEditorHeaderProps) {
   const router = useRouter();
 
@@ -30,8 +32,8 @@ export default function ProductEditorHeader({
               Products
             </p>
 
-            <h1 className="truncate text-lg font-semibold text-gray-900">
-              Add product
+<h1 className="truncate text-lg font-semibold text-gray-900">
+              {title}
             </h1>
           </div>
         </div>

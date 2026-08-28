@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { prototypeCategories } from "../../../lib/product-prototype/categories";
+import { getDemoProduct } from "../../../lib/demo-products";
 
 import ProductEditorHeader from "./layout/ProductEditorHeader";
 import ProductEditorLayout from "./layout/ProductEditorLayout";
@@ -134,16 +135,46 @@ function generateVariants(
   });
 }
 
-export default function ProductEditor() {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+export default function ProductEditor({
+  productId,
+}: {
+  productId?: number;
+}) {
+  const demoProduct = productId
+    ? getDemoProduct(productId)
+    : undefined;
 
-  const [categoryId, setCategoryId] = useState("");
+  const isEdit = Boolean(productId);
 
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
+  const [name, setName] = useState(
+    demoProduct?.name ?? ""
+  );
+  const [description, setDescription] = useState(
+    demoProduct?.description ?? ""
+  );
 
-  const [preview, setPreview] = useState("");
+  const [categoryId, setCategoryId] = useState(() => {
+    if (!demoProduct) return "";
+
+    const match = prototypeCategories.find(
+      (category) =>
+        category.name.trim().toLowerCase() ===
+        demoProduct.category.trim().toLowerCase()
+    );
+
+    return match?.id ?? "";
+  });
+
+  const [price, setPrice] = useState(
+    demoProduct ? String(demoProduct.price) : ""
+  );
+  const [stock, setStock] = useState(
+    demoProduct ? String(demoProduct.stock) : ""
+  );
+
+  const [preview, setPreview] = useState(
+    demoProduct?.image ?? ""
+  );
 
   const [options, setOptions] = useState<ProductOption[]>(
     []
@@ -202,13 +233,43 @@ export default function ProductEditor() {
     });
 
     alert(
-      "Prototype only — no product will be saved."
+      isEdit
+        ? "Edit prototype only — no product will be saved."
+        : "Prototype only — no product will be saved."
+    );
+  }
+
+  if (isEdit && !demoProduct) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900">
+            المنتج غير موجود
+          </h2>
+
+          <p className="mt-2 text-sm text-gray-500">
+            تعذّر العثور على المنتج رقم {productId} في
+            البيانات التجريبية.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              window.location.assign("/admin/products")
+            }
+            className="mt-6 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+          >
+            العودة للمنتجات
+          </button>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <ProductEditorHeader
+        title={isEdit ? "Edit product" : "Add product"}
         onSave={handleSave}
       />
 

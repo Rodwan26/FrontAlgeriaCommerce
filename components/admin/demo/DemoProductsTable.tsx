@@ -1,43 +1,8 @@
-﻿"use client";
+"use client";
 
-import { ExternalLink, Pencil, Trash2 } from "lucide-react";
+import { LayoutTemplate, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-type DemoProduct = {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-  image: string | null;
-};
-
-const DEMO_PRODUCTS: DemoProduct[] = [
-  {
-    id: 1,
-    name: "HOKA Running Shoe",
-    description: "Premium running shoes designed for comfort and performance.",
-    category: "Shoes",
-    price: 29900,
-    image: "/products/hero.webp",
-  },
-  {
-    id: 2,
-    name: "Premium Sport Shoes",
-    description: "Lightweight sport shoes for everyday training.",
-    category: "Shoes",
-    price: 24900,
-    image: "/products/hero.webp",
-  },
-  {
-    id: 3,
-    name: "Urban Running Shoes",
-    description: "Modern running shoes with a comfortable lightweight design.",
-    category: "Sports",
-    price: 27900,
-    image: "/products/hero.webp",
-  },
-];
+import { DEMO_PRODUCTS } from "@/lib/demo-products";
 
 export default function DemoProductsTable() {
   const router = useRouter();
@@ -104,28 +69,27 @@ export default function DemoProductsTable() {
                 </span>
               </td>
 
-              <td className="px-6 py-4">
+<td className="px-6 py-4">
                 <div className="flex items-center gap-2">
+
                   <button
                     type="button"
                     onClick={() =>
-                      router.push(
-                        `/admin/products/${product.id}/landing-page`
-                      )
+                      router.push(`/admin/products/${product.id}/landing`)
                     }
-                    title="Create Landing Page"
-                    className="inline-flex items-center gap-2 rounded-lg bg-purple-50 px-3 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-100"
+                    title="صفحة الهبوط"
+                    className="rounded-lg p-2 text-green-600 transition hover:bg-green-50"
                   >
-                    <ExternalLink size={17} />
-
-                    Landing Page
+                    <LayoutTemplate size={18} />
                   </button>
 
                   <button
                     type="button"
-                    disabled
-                    title="Demo only"
-                    className="rounded-lg p-2 text-gray-300"
+                    onClick={() =>
+                      router.push(`/admin/products/edit/${product.id}`)
+                    }
+                    title="تعديل المنتج"
+                    className="rounded-lg p-2 text-indigo-600 transition hover:bg-indigo-50"
                   >
                     <Pencil size={18} />
                   </button>
