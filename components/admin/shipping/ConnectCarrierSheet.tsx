@@ -113,8 +113,9 @@ export default function ConnectCarrierSheet({
         setDone(true);
         setValues({});
       }
-    } catch {
-      setConnectError(translateError("network"));
+    } catch (err) {
+      const code = (err as { code?: string } | null)?.code ?? "network";
+      setConnectError(translateError(code));
     } finally {
       setBusy(false);
     }

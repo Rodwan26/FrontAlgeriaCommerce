@@ -92,10 +92,18 @@ export default function ManageConnectionSheet({
     setBusy("test");
     setMessage(null);
     try {
-      await test(connection.id);
-      setMessage({ type: "ok", text: t("testOk") });
-    } catch {
-      setMessage({ type: "error", text: translateError("network") });
+      const updated = await test(connection.id);
+      if (updated.status === "error") {
+        setMessage({
+          type: "error",
+          text: translateError(updated.lastErrorCode),
+        });
+      } else {
+        setMessage({ type: "ok", text: t("testOk") });
+      }
+    } catch (err) {
+      const code = (err as { code?: string } | null)?.code ?? "network";
+      setMessage({ type: "error", text: translateError(code) });
     } finally {
       setBusy(null);
     }
@@ -122,8 +130,9 @@ export default function ManageConnectionSheet({
         setEditMode(false);
         setValues({});
       }
-    } catch {
-      setMessage({ type: "error", text: translateError("network") });
+    } catch (err) {
+      const code = (err as { code?: string } | null)?.code ?? "network";
+      setMessage({ type: "error", text: translateError(code) });
     } finally {
       setBusy(null);
     }

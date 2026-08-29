@@ -104,6 +104,18 @@ const ERROR_MESSAGES: Record<
     ar: "بيانات الاعتماد غير صحيحة. تأكد من نسخ المفاتيح كاملةً من لوحة الشركة.",
     fr: "Identifiants invalides. Vérifiez les clés copiées depuis le tableau de bord.",
   },
+  carrier_not_found: {
+    ar: "شركة الشحن غير موجودة.",
+    fr: "Le transporteur n'existe pas.",
+  },
+  carrier_inactive: {
+    ar: "شركة الشحن غير مفعّلة حالياً.",
+    fr: "Le transporteur est actuellement désactivé.",
+  },
+  connection_not_found: {
+    ar: "اتصال الشحن غير موجود.",
+    fr: "La connexion de livraison n'existe pas.",
+  },
   invalid_commune: {
     ar: "بيانات البلدية غير مطابقة لقائمة الشركة.",
     fr: "La commune ne correspond pas aux listes du transporteur.",

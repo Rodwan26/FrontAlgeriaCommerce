@@ -1,135 +1,95 @@
-import { CARRIERS_FIXTURE } from "./carriers.fixture";
 import type {
   Carrier,
   Connection,
   ConnectionInput,
-  CredField,
 } from "./types";
 
-const STORAGE_KEY = "shipping-connections:v1";
-const LATENCY = 600;
+async function request<T>(
+  path: string,
+  method: string,
+  body?: unknown
+): Promise<T> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+  if (!baseUrl) {
+    const e = new Error("NEXT_PUBLIC_API_URL is not set") as Error & {
+      code?: string;
+    };
+    e.code = "network";
+    throw e;
+  }
 
-function readStored(): Connection[] {
-  if (typeof window === "undefined") return [];
+  let res: Response;
+
   try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "[]");
+    res = await fetch(`${baseUrl}${path}`, {
+      method,
+      headers:
+        body !== undefined
+          ? { "Content-Type": "application/json" }
+          : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
   } catch {
-    return [];
+    const e = new Error("network") as Error & { code?: string };
+    e.code = "network";
+    throw e;
   }
-}
 
-function writeStored(list: Connection[]): void {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
-
-function validateCredentials(
-  schema: CredField[],
-  credentials: Record<string, string>
-): string | undefined {
-  for (const field of schema) {
-    const value = (credentials[field.key] ?? "").trim();
-    if (field.required && value.length < 4) {
-      return "invalid_credentials";
+  if (!res.ok) {
+    let code = "unknown";
+    try {
+      const parsed = await res.json();
+      if (parsed && typeof parsed.code === "string") {
+        code = parsed.code;
+      }
+    } catch {
+      // keep "unknown"
     }
+    const e = new Error(code) as Error & { code?: string };
+    e.code = code;
+    throw e;
   }
-  return undefined;
-}
 
-export function getCarrierById(id: string): Carrier | undefined {
-  return CARRIERS_FIXTURE.find((carrier) => carrier.id === id);
+  if (res.status === 204) {
+    return undefined as unknown as T;
+  }
+
+  return (await res.json()) as T;
 }
 
 export async function fetchCarriers(): Promise<Carrier[]> {
-  await delay(300);
-  return [...CARRIERS_FIXTURE].sort(
-    (a, b) => a.sortedOrder - b.sortedOrder
-  );
+  return request<Carrier[]>("/shipping/carriers", "GET");
 }
 
 export async function fetchConnections(): Promise<Connection[]> {
-  await delay(150);
-  return readStored();
+  return request<Connection[]>("/shipping/connections", "GET");
 }
 
 export async function createConnection(
   input: ConnectionInput
 ): Promise<Connection> {
-  await delay(LATENCY);
-  const carrier = getCarrierById(input.carrierId);
-  const code = carrier
-    ? validateCredentials(carrier.credentialSchema, input.credentials)
-    : "invalid_credentials";
-
-  const connection: Connection = {
-    id:
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : String(Date.now()),
-    carrierId: input.carrierId,
-    status: code ? "error" : "connected",
-    lastErrorCode: code,
-    credentialKeys: carrier ? carrier.credentialSchema.map((f) => f.key) : [],
-  };
-
-  const list = readStored().filter(
-    (item) => item.carrierId !== input.carrierId
-  );
-  writeStored([...list, connection]);
-  return connection;
+  return request<Connection>("/shipping/connections", "POST", input);
 }
 
 export async function updateCredentials(
   id: string,
   credentials: Record<string, string>
 ): Promise<Connection> {
-  await delay(LATENCY);
-  const list = readStored();
-  const index = list.findIndex((item) => item.id === id);
-  if (index === -1) {
-    throw new Error("connection_not_found");
-  }
-  const current = list[index];
-  const carrier = getCarrierById(current.carrierId);
-  const code = carrier
-    ? validateCredentials(carrier.credentialSchema, credentials)
-    : "invalid_credentials";
-
-  const updated: Connection = {
-    ...current,
-    status: code ? "error" : "connected",
-    lastErrorCode: code,
-    credentialKeys: carrier ? carrier.credentialSchema.map((f) => f.key) : [],
-  };
-
-  writeStored(
-    list.map((item) => (item.id === id ? updated : item))
+  return request<Connection>(
+    `/shipping/connections/${id}`,
+    "PATCH",
+    { credentials }
   );
-  return updated;
 }
 
 export async function testConnection(id: string): Promise<Connection> {
-  await delay(LATENCY);
-  const list = readStored();
-  const index = list.findIndex((item) => item.id === id);
-  if (index === -1) {
-    throw new Error("connection_not_found");
-  }
-  const updated: Connection = {
-    ...list[index],
-    status: "connected",
-    lastErrorCode: undefined,
-  };
-  writeStored(
-    list.map((item) => (item.id === id ? updated : item))
+  return request<Connection>(
+    `/shipping/connections/${id}/test`,
+    "POST"
   );
-  return updated;
 }
 
 export async function disconnectConnection(id: string): Promise<void> {
-  await delay(300);
-  writeStored(readStored().filter((item) => item.id !== id));
+  await request<null>(`/shipping/connections/${id}`, "DELETE");
 }
