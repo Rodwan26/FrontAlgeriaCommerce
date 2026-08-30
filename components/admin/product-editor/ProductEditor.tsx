@@ -1,6 +1,8 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+
+import { useRouter } from "next/navigation";
 
 import { prototypeCategories } from "../../../lib/product-prototype/categories";
 import { getDemoProduct } from "../../../lib/demo-products";
@@ -156,6 +158,8 @@ export default function ProductEditor({
       ? "Duplicate product"
       : "Add product";
 
+  const router = useRouter();
+
   const [name, setName] = useState(
     demoProduct?.name ?? ""
   );
@@ -186,6 +190,15 @@ export default function ProductEditor({
     demoProduct?.image ?? ""
   );
 
+  const [status, setStatus] = useState(
+    "draft"
+  );
+
+  const [tags, setTags] = useState("");
+
+  const [collections, setCollections] =
+    useState("");
+
   const [options, setOptions] = useState<ProductOption[]>(
     []
   );
@@ -194,14 +207,26 @@ export default function ProductEditor({
     []
   );
 
-  const selectedCategory = useMemo(
-    () =>
-      prototypeCategories.find(
-        (category) =>
-          category.id === categoryId
-      ),
-    [categoryId]
-  );
+  const [realCategories, setRealCategories] = useState<
+    { id: number; name: string }[]
+  >([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setRealCategories(data);
+      })
+      .catch(() => {
+        // keep the list empty if categories cannot be loaded
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleOptionsChange(
     nextOptions: ProductOption[]
@@ -229,24 +254,78 @@ export default function ProductEditor({
     );
   }
 
-  function handleSave() {
-    console.log({
-      name,
-      description,
-      categoryId,
-      category:
-        selectedCategory?.name ?? null,
-      price,
-      stock,
-      options,
-      variants,
-    });
+  async function handleSave() {
+    if (!name.trim()) {
+      alert("Please enter a product name");
+      return;
+    }
 
-    alert(
-      isEdit
-        ? "Edit prototype only — no product will be saved."
-        : "Prototype only — no product will be saved."
+    if (!price) {
+      alert("Please enter a price");
+      return;
+    }
+
+    if (!categoryId) {
+      alert("Please select a category");
+      return;
+    }
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/products`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          description,
+          price: Number(price),
+          stock: Number(stock) || 0,
+          status,
+          category_id: Number(categoryId),
+          options: options
+            .filter(
+              (option) => option.name.trim()
+            )
+            .map((option) => ({
+              name: option.name,
+              values: option.values.filter(
+                (value) => value.trim()
+              ),
+            })),
+          variants: variants
+            .filter(
+              (variant) => variant.sku.trim()
+            )
+            .map((variant) => ({
+              sku: variant.sku,
+              price: variant.price
+                ? Number(variant.price)
+                : undefined,
+              stock: Number(variant.stock) || 0,
+              options: variant.values,
+            })),
+          tags: tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0),
+          collections: collections
+            .split(",")
+            .map((id) => Number(id.trim()))
+            .filter(
+              (id) => Number.isFinite(id) && id > 0
+            ),
+        }),
+      }
     );
+
+    if (!res.ok) {
+      alert("Failed to create product");
+      return;
+    }
+
+    router.push("/admin/products");
   }
 
   if ((isEdit || isClone) && !demoProduct) {
@@ -338,7 +417,10 @@ export default function ProductEditor({
 
               <div className="p-5">
                 <select
-                  defaultValue="draft"
+                  value={status}
+                  onChange={(e) =>
+                    setStatus(e.target.value)
+                  }
                   className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 >
                   <option value="draft">
@@ -378,7 +460,7 @@ export default function ProductEditor({
                       Select category
                     </option>
 
-                    {prototypeCategories.map(
+                    {realCategories.map(
                       (category) => (
                         <option
                           key={category.id}
@@ -398,9 +480,18 @@ export default function ProductEditor({
 
                   <input
                     type="text"
-                    placeholder="Search collections"
+                    value={collections}
+                    onChange={(e) =>
+                      setCollections(e.target.value)
+                    }
+                    placeholder="Collection IDs (comma separated)"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   />
+
+                  <p className="mt-2 text-xs text-gray-500">
+                    Enter collection IDs separated by
+                    commas.
+                  </p>
                 </div>
 
                 <div>
@@ -410,7 +501,11 @@ export default function ProductEditor({
 
                   <input
                     type="text"
-                    placeholder="Add tags"
+                    value={tags}
+                    onChange={(e) =>
+                      setTags(e.target.value)
+                    }
+                    placeholder="Add tags (comma separated)"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                   />
 
