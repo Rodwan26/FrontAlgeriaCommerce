@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Algerian E-Commerce — Frontend
 
-## Getting Started
+Web storefront and admin dashboard for the Algerian e-commerce platform, built with **Next.js 16** + **React 19** + **Tailwind CSS v4** + **TypeScript**.
 
-First, run the development server:
+Deployed on Vercel: <https://front-algeria-commerce.vercel.app>
+
+## Tech Stack
+
+- **Framework:** Next.js (App Router) 16.3
+- **UI:** React 19, Tailwind CSS v4, lucide-react icons
+- **Language:** TypeScript
+
+## Requirements
+
+- Node.js 20+
+- npm
+
+## Getting Started (local)
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure the API URL
+
+Create a `.env.local` file at the project root (git-ignored):
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Point it to the backend. In local development this is `http://localhost:8000` (the FastAPI backend). For a deployed build, set it to the deployed backend URL (e.g. `https://backalgeriacommerce.onrender.com`) via your hosting provider's environment settings.
+
+### 3. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000> with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Running with Docker Compose
 
-To learn more about Next.js, take a look at the following resources:
+From the repository root of the full project, the frontend runs alongside the backend and PostgreSQL:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker compose up --build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The frontend is exposed on port `3000`.
 
-## Deploy on Vercel
+## Environment Variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variable | Description | Example |
+| --- | --- | --- |
+| `NEXT_PUBLIC_API_URL` | Base URL of the backend API | `http://localhost:8000` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Structure
+
+```
+app/
+  admin/           # Admin dashboard (products, categories, orders, shipping, settings, landing builder)
+  landing/         # Storefront landing page
+  p/[slug]/        # Public product pages
+  sign-up/         # Sign-up page
+components/
+  admin/           # Admin UI components (product editor, category, orders, dashboard, shipping, landing-builder)
+lib/
+  shipping/        # Shipping API client, hooks, types, translations
+  landing-page/    # Landing page builder state/types/hooks
+  product-prototype/ # Product prototype categories/types
+  images.ts        # Image URL helper
+  demo-products.ts # Demo product data
+```
+
+## Scripts
+
+| Script | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm start` | Start the production server |
+| `npm run lint` | Run ESLint |
+
+## Security Notes
+
+- `.env.local` and other env files are git-ignored; never commit real secrets.
+- Only committed configuration uses safe defaults; real API URLs are provided via environment variables.
