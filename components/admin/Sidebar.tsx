@@ -9,6 +9,7 @@ import {
   Store,
   Truck,
   X,
+  Layers,
 } from "lucide-react";
 import { useRef } from "react";
 
@@ -43,6 +44,11 @@ const links = [
     title: "Categories",
     href: "/admin/categories",
     icon: Package,
+  },
+  {
+    title: "Collections",
+    href: "/admin/collections",
+    icon: Layers,
   },
   {
     title: "Shipping",

@@ -13,6 +13,7 @@ export default function ProductsView() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [togglingId, setTogglingId] = useState<number | null>(null);
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -97,20 +98,52 @@ export default function ProductsView() {
     setPage(1);
   }
 
-  function handleToggleStatus(productId: number) {
-    setProducts((current) =>
-      current.map((product) =>
-        product.id === productId
-          ? {
-              ...product,
-              status:
-                (product.status ?? "active") === "active"
-                  ? "draft"
-                  : "active",
-            }
-          : product
-      )
-    );
+  async function handleToggleStatus(productId: number) {
+    const product = products.find((item) => item.id === productId);
+
+    if (!product) {
+      return;
+    }
+
+    const nextStatus =
+      (product.status ?? "active") === "active" ? "draft" : "active";
+
+    setTogglingId(productId);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products/${productId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: nextStatus,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to update status");
+      }
+
+      setProducts((current) =>
+        current.map((item) =>
+          item.id === productId
+            ? {
+                ...item,
+                status: nextStatus,
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      alert("Failed to update status");
+    } finally {
+      setTogglingId(null);
+    }
   }
 
   async function handleDelete(productId: number) {
@@ -169,6 +202,7 @@ export default function ProductsView() {
             products={paginated}
             onDelete={handleDelete}
             deletingId={deletingId}
+            togglingId={togglingId}
             onToggleStatus={handleToggleStatus}
             onDuplicate={(id) =>
               (window.location.href = `/admin/products/duplicate/${id}`)

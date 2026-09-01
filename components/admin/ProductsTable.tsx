@@ -9,6 +9,7 @@ type Props = {
   products: Product[];
   onDelete: (productId: number) => void;
   deletingId: number | null;
+  togglingId: number | null;
   onToggleStatus: (productId: number) => void;
   onDuplicate: (productId: number) => void;
 };
@@ -17,6 +18,7 @@ export default function ProductsTable({
   products,
   onDelete,
   deletingId,
+  togglingId,
   onToggleStatus,
   onDuplicate,
 }: Props) {
@@ -49,6 +51,7 @@ export default function ProductsTable({
                 product={product}
                 onDelete={onDelete}
                 deleting={deletingId === product.id}
+                toggling={togglingId === product.id}
                 onToggleStatus={onToggleStatus}
                 onDuplicate={onDuplicate}
               />

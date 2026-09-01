@@ -5,11 +5,13 @@ import { ImagePlus, X } from "lucide-react";
 type ProductMediaProps = {
   preview: string;
   onFileChange: (file: File | null) => void;
+  error?: string;
 };
 
 export default function ProductMedia({
   preview,
   onFileChange,
+  error,
 }: ProductMediaProps) {
   return (
     <section className="rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -60,6 +62,12 @@ export default function ProductMedia({
               Upload images to showcase your product
             </p>
           </label>
+        )}
+
+        {error && (
+          <p className="mt-3 text-sm font-medium text-red-600">
+            {error}
+          </p>
         )}
       </div>
     </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   ArrowLeft,
   ExternalLink,
@@ -8,16 +8,68 @@ import {
   Pencil,
 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-import { getDemoProduct } from "@/lib/demo-products";
 import { getLandingPageSlug, productPublicUrl } from "@/lib/landing-page/storage";
+import { imageUrl } from "@/lib/images";
+
+type DetailProduct = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  status: string;
+  image: string | null;
+  category: { id: number; name: string } | null;
+};
 
 function ProductDetailPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const productId = Number(params?.id);
-  const product = getDemoProduct(productId);
 
-  if (!product) {
+  const [product, setProduct] = useState<DetailProduct | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (!productId) return;
+
+    let cancelled = false;
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to load product");
+        }
+
+        return res.json();
+      })
+      .then((data) => {
+        if (!cancelled) setProduct(data);
+      })
+      .catch(() => {
+        if (!cancelled) setNotFound(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm font-medium text-gray-500">
+          Loading...
+        </p>
+      </div>
+    );
+  }
+
+  if (notFound || !product) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
@@ -25,7 +77,7 @@ function ProductDetailPage() {
             Product not found
           </h2>
           <p className="mt-2 text-sm text-gray-500">
-            Could not find product #{productId} in demo data.
+            Could not find product #{productId}.
           </p>
           <button
             type="button"
@@ -107,7 +159,7 @@ function ProductDetailPage() {
           <div className="aspect-square w-full bg-gray-50">
             {product.image ? (
               <img
-                src={product.image}
+                src={imageUrl(product.image)}
                 alt={product.name}
                 className="h-full w-full object-cover"
               />
@@ -131,7 +183,7 @@ function ProductDetailPage() {
               <div>
                 <dt className="text-sm text-gray-500">Category</dt>
                 <dd className="mt-1 text-sm font-semibold text-gray-900">
-                  {product.category}
+                  {product.category?.name ?? "—"}
                 </dd>
               </div>
 

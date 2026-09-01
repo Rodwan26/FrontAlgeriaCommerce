@@ -27,6 +27,7 @@ type Props = {
   product: Product;
   onDelete: (productId: number) => void;
   deleting: boolean;
+  toggling: boolean;
   onToggleStatus: (productId: number) => void;
   onDuplicate: (productId: number) => void;
 };
@@ -35,6 +36,7 @@ export default function ProductRow({
   product,
   onDelete,
   deleting,
+  toggling,
   onToggleStatus,
   onDuplicate,
 }: Props) {
@@ -120,8 +122,9 @@ export default function ProductRow({
         <button
           type="button"
           onClick={() => onToggleStatus(product.id)}
+          disabled={toggling}
           title={status === "active" ? "Switch to draft" : "Publish product"}
-          className={`group flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition ${
+          className={`group flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${
             status === "active"
               ? "bg-green-100 text-green-700"
               : "bg-gray-100 text-gray-600"
