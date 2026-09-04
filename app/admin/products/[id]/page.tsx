@@ -30,6 +30,7 @@ function ProductDetailPage() {
   const [product, setProduct] = useState<DetailProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [landingSlug, setLandingSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (!productId) return;
@@ -58,6 +59,22 @@ function ProductDetailPage() {
       cancelled = true;
     };
   }, [productId]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+
+    let cancelled = false;
+
+    getLandingPageSlug(product.id)
+      .then((value) => {
+        if (!cancelled) setLandingSlug(value);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [product?.id]);
 
   if (loading) {
     return (
@@ -91,7 +108,7 @@ function ProductDetailPage() {
     );
   }
 
-  const slug = getLandingPageSlug(product.id);
+  const slug = landingSlug;
   const publicUrl = slug
     ? `${window.location.origin}${productPublicUrl(slug)}`
     : "";

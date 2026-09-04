@@ -8,11 +8,17 @@ import { useLocations } from "@/components/landing/hooks/useLocations";
 
 type Props = {
   section: OrderFormSection;
+  productId: number;
+  slug: string;
 };
 
 type DeliveryMethod = "home" | "office";
 
-export default function BuilderOrderForm({ section }: Props) {
+export default function BuilderOrderForm({
+  section,
+  productId,
+  slug,
+}: Props) {
   const { colors } = section;
 
   const field = (id: "name" | "phone" | "wilaya" | "commune" | "delivery" | "quantity" | "address") =>
@@ -67,7 +73,35 @@ export default function BuilderOrderForm({ section }: Props) {
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      const wilayaName =
+        wilayas.find((w) => w.code === wilayaCode)?.nameAr ?? "";
+      const communeName =
+        communes.find((c) => c.code === communeCode)?.nameAr ?? "";
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/orders/from-landing`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            slug,
+            name: name.trim(),
+            phone: phone.trim(),
+            wilaya: wilayaName,
+            commune: communeName,
+            address: address.trim() || null,
+            delivery_type: deliveryMethod,
+            quantity,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to submit order");
+      }
+
       setSubmitted(true);
     } catch {
       alert("حدث خطأ، يرجى المحاولة مرة أخرى");

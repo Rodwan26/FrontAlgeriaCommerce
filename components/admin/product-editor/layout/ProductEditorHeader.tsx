@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect, useState } from "react";
 import { ArrowLeft, ExternalLink, LayoutTemplate, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getLandingPageSlug, productPublicUrl } from "@/lib/landing-page/storage";
@@ -16,11 +17,28 @@ export default function ProductEditorHeader({
   productId,
 }: ProductEditorHeaderProps) {
   const router = useRouter();
+  const [slug, setSlug] = useState<string | null>(null);
 
-  const slug =
-    typeof window !== "undefined" && productId
-      ? getLandingPageSlug(productId)
-      : null;
+  useEffect(() => {
+    if (!productId) {
+      setSlug(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    getLandingPageSlug(productId)
+      .then((value) => {
+        if (!cancelled) setSlug(value);
+      })
+      .catch(() => {
+        if (!cancelled) setSlug(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [productId]);
 
   const publicUrl =
     slug && typeof window !== "undefined"

@@ -31,7 +31,14 @@ export default function LandingPageRenderer({ page }: { page: LandingPage }) {
               case "faq":
                 return <BuilderFaq key={section.id} section={section} />;
               case "order-form":
-                return <BuilderOrderForm key={section.id} section={section} />;
+                return (
+                  <BuilderOrderForm
+                    key={section.id}
+                    section={section}
+                    productId={page.productId}
+                    slug={page.slug}
+                  />
+                );
               case "footer":
                 return <BuilderFooter key={section.id} section={section} />;
               default:

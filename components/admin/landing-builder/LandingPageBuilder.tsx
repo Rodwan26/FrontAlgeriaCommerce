@@ -115,9 +115,17 @@ export default function LandingPageBuilder({ productId }: Props) {
     selectSection(section.id);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!page || !page.slug) return;
-    saveLandingPage(page);
+
+    const result = await saveLandingPage(page);
+
+    if (!result) {
+      alert("تعذّر حفظ صفحة الهبوط. تحقق من الاتصال بالخادم وحاول مجددًا.");
+      return;
+    }
+
+    setPage(result);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
