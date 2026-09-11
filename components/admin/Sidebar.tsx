@@ -10,6 +10,7 @@ import {
   Truck,
   X,
   Layers,
+  LayoutTemplate,
 } from "lucide-react";
 import { useRef } from "react";
 
@@ -49,6 +50,11 @@ const links = [
     title: "Collections",
     href: "/admin/collections",
     icon: Layers,
+  },
+  {
+    title: "Landing Pages",
+    href: "/admin/landing-pages",
+    icon: LayoutTemplate,
   },
   {
     title: "Shipping",

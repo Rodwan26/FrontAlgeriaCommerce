@@ -169,6 +169,7 @@ export type LandingSection =
 export type LandingPage = {
   id: string;
   productId: number;
+  product?: { id: number; name: string } | null;
   slug: string;
   title: string;
   brand: string;

@@ -7,6 +7,7 @@ const URL_PREFIX = "/p/";
 type BackendPage = {
   id: number;
   product_id: number | null;
+  product: { id: number; name: string } | null;
   slug: string;
   title: string;
   brand: string;
@@ -18,6 +19,7 @@ function toFrontendPage(raw: BackendPage): LandingPage {
   return {
     id: String(raw.id),
     productId: raw.product_id ?? 0,
+    product: raw.product ?? null,
     slug: raw.slug,
     title: raw.title,
     brand: raw.brand,
@@ -117,16 +119,18 @@ export async function saveLandingPage(
   return toFrontendPage(saved);
 }
 
-export async function deleteLandingPage(slug: string): Promise<void> {
+export async function deleteLandingPage(slug: string): Promise<boolean> {
   const page = await getLandingPageBySlug(slug);
 
   if (!page) {
-    return;
+    return false;
   }
 
-  await fetch(`${API_URL}/landing-pages/${page.id}`, {
+  const res = await fetch(`${API_URL}/landing-pages/${page.id}`, {
     method: "DELETE",
   });
+
+  return res.ok;
 }
 
 export function productPublicUrl(slug: string): string {
