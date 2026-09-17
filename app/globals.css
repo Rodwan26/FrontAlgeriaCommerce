@@ -37,7 +37,7 @@ body {
   margin: 0;
   background: #101112;
   color: #eeeeee;
-  font-family: var(--font-sans), "Tajawal", "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-sans), var(--font-tajawal), "Segoe UI", system-ui, sans-serif;
 }
 
 /* ========================================
