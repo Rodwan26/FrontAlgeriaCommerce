@@ -68,27 +68,13 @@ export default function OrdersTable() {
     loadOrders();
   }, []);
 
-  function getStatusStyle(status: string) {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-700";
-
-      case "confirmed":
-        return "bg-blue-100 text-blue-700";
-
-      case "shipped":
-        return "bg-purple-100 text-purple-700";
-
-      case "delivered":
-        return "bg-green-100 text-green-700";
-
-      case "cancelled":
-        return "bg-red-100 text-red-700";
-
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  }
+  const statusPillClass: Record<string, string> = {
+    pending: "pill-pending",
+    confirmed: "pill-confirmed",
+    shipped: "pill-shipped",
+    delivered: "pill-delivered",
+    cancelled: "pill-cancelled",
+  };
 
   function formatStatus(status: string) {
     return status.charAt(0).toUpperCase() + status.slice(1);
@@ -142,7 +128,7 @@ export default function OrdersTable() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border bg-white p-8 text-center">
+      <div className="card p-8 text-center">
         <p className="text-gray-500">
           Loading orders...
         </p>
@@ -156,7 +142,7 @@ export default function OrdersTable() {
       {/* Statistics */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-gray-500">
             Total
           </p>
@@ -166,7 +152,7 @@ export default function OrdersTable() {
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-yellow-600">
             Pending
           </p>
@@ -176,7 +162,7 @@ export default function OrdersTable() {
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-blue-600">
             Confirmed
           </p>
@@ -186,7 +172,7 @@ export default function OrdersTable() {
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-purple-600">
             Shipped
           </p>
@@ -196,7 +182,7 @@ export default function OrdersTable() {
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-green-600">
             Delivered
           </p>
@@ -206,7 +192,7 @@ export default function OrdersTable() {
           </p>
         </div>
 
-        <div className="rounded-xl border bg-white p-5 shadow-sm">
+        <div className="card p-5">
           <p className="text-sm text-red-600">
             Cancelled
           </p>
@@ -219,7 +205,7 @@ export default function OrdersTable() {
       </div>
 
       {/* Search + Filter */}
-      <div className="rounded-xl border bg-white p-5 shadow-sm">
+      <div className="card p-5">
 
         <div className="flex flex-col gap-4 md:flex-row">
 
@@ -236,7 +222,7 @@ export default function OrdersTable() {
               placeholder="Search by order ID, customer name or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="input pl-10 pr-4"
             />
 
           </div>
@@ -245,7 +231,7 @@ export default function OrdersTable() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border px-4 py-2.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="select"
           >
             {statuses.map((status) => (
               <option
@@ -265,7 +251,7 @@ export default function OrdersTable() {
 
       {/* Orders table */}
       {filteredOrders.length === 0 ? (
-        <div className="rounded-xl border bg-white p-10 text-center">
+        <div className="card p-10 text-center">
 
           <p className="font-medium text-gray-700">
             No orders found.
@@ -277,7 +263,7 @@ export default function OrdersTable() {
 
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
+        <div className="card overflow-hidden">
 
           <div className="overflow-x-auto">
 
@@ -287,31 +273,31 @@ export default function OrdersTable() {
 
                 <tr>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left table-head">
                     Order
                   </th>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left table-head">
                     Customer
                   </th>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left table-head">
                     Phone
                   </th>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left table-head">
                     Items
                   </th>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left table-head">
                     Total
                   </th>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-left table-head">
                     Status
                   </th>
 
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">
+                  <th className="px-6 py-4 text-center table-head">
                     Actions
                   </th>
 
@@ -362,7 +348,7 @@ export default function OrdersTable() {
                     {/* Items */}
                     <td className="px-6 py-4">
 
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+                      <span className="pill pill-draft">
                         {order.items.reduce(
                           (total, item) =>
                             total + item.quantity,
@@ -383,10 +369,11 @@ export default function OrdersTable() {
                     <td className="px-6 py-4">
 
                       <span
-                        className={`rounded-full px-3 py-1 text-sm font-medium ${getStatusStyle(
-                          order.status
-                        )}`}
+                        className={`pill ${
+                          statusPillClass[order.status] ?? "pill-draft"
+                        }`}
                       >
+                        <span className="pill-dot" />
                         {formatStatus(order.status)}
                       </span>
 
@@ -399,7 +386,7 @@ export default function OrdersTable() {
 
                         <Link
                           href={`/admin/orders/${order.id}`}
-                          className="rounded-lg bg-blue-100 p-2 text-blue-600 transition hover:bg-blue-200"
+                          className="btn-icon"
                           title="View order"
                         >
                           <Eye size={18} />

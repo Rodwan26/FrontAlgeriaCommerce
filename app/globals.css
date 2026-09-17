@@ -758,6 +758,31 @@ h6 {
   color: #b91c1c;
 }
 
+.pill-pending {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.pill-confirmed {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.pill-shipped {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.pill-delivered {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.pill-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
 .page-title {
   font-size: 1.75rem;
   font-weight: 700;
