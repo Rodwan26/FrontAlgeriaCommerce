@@ -597,6 +597,8 @@ h6 {
    Applied page-by-page, tokens defined in @theme above.
    ========================================================= */
 
+@layer components {
+
 .card {
   border-radius: 0.75rem;
   border: 1px solid #e5e7eb;
@@ -803,5 +805,7 @@ h6 {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #6b7280;
+}
+
 }
 
